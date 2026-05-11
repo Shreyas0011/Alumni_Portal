@@ -15,7 +15,7 @@ const Events = () => {
       time: "10:00 AM - 4:00 PM",
       location: "San Francisco / Virtual",
       category: "Summit",
-      image: "/src/assets/generated/tech_summit.png",
+      image: "/events/tech_summit.png",
       desc: "Join top industry leaders for a day of networking, innovation, and career insights.",
       host: "Alumni Tech Council"
     },
@@ -26,7 +26,7 @@ const Events = () => {
       time: "6:30 PM Onwards",
       location: "Main Campus Great Hall",
       category: "Reunion",
-      image: "/src/assets/generated/gala_dinner.png",
+      image: "/events/gala_dinner.png",
       desc: "Celebrate 50 years of excellence with a grand gala dinner and departmental tours.",
       host: "University Events"
     },
@@ -37,7 +37,7 @@ const Events = () => {
       time: "Weekend Stay",
       location: "Lake Como, Italy",
       category: "Retreat",
-      image: "/src/assets/generated/leadership_retreat.png",
+      image: "/events/leadership_retreat.png",
       desc: "An exclusive retreat for C-suite alumni to discuss global leadership trends.",
       host: "Executive Board"
     },
