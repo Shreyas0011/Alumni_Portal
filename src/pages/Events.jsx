@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Clock, ArrowRight, Sparkles, Check, Bell, BellOff, Globe } from 'lucide-react';
+import { Calendar, MapPin, Clock, ArrowRight, Sparkles, Check, Globe, Users } from 'lucide-react';
+import './Events.css';
 
 const Events = () => {
   const [registeredEvents, setRegisteredEvents] = useState({});
@@ -14,6 +15,7 @@ const Events = () => {
       time: "10:00 AM - 4:00 PM",
       location: "San Francisco / Virtual",
       category: "Summit",
+      image: "/src/assets/generated/tech_summit.png",
       desc: "Join top industry leaders for a day of networking, innovation, and career insights.",
       host: "Alumni Tech Council"
     },
@@ -24,171 +26,162 @@ const Events = () => {
       time: "6:30 PM Onwards",
       location: "Main Campus Great Hall",
       category: "Reunion",
+      image: "/src/assets/generated/gala_dinner.png",
       desc: "Celebrate 50 years of excellence with a grand gala dinner and departmental tours.",
       host: "University Events"
     },
     {
       id: 3,
-      title: "Design Thinking Workshop",
-      date: "JULY 05",
-      time: "2:00 PM - 5:00 PM",
-      location: "Virtual Workshop",
-      category: "Workshop",
-      desc: "Master the art of user-centric design in this hands-on workshop led by design veterans.",
-      host: "Creative Arts Guild"
-    },
-    {
-      id: 4,
-      title: "Alumni Startup Pitch Night",
-      date: "AUG 18",
-      time: "5:00 PM - 8:00 PM",
-      location: "New York Hub",
-      category: "Networking",
-      desc: "Watch our brightest alumni entrepreneurs pitch to top-tier VC firms.",
-      host: "Entrepreneurship Lab"
-    },
-    {
-      id: 5,
-      title: "AI in Healthcare Webinar",
-      date: "SEPT 22",
-      time: "11:00 AM - 12:30 PM",
-      location: "Global Broadcast",
-      category: "Webinar",
-      desc: "Explore how artificial intelligence is revolutionizing modern healthcare practices.",
-      host: "Health Science Dept"
-    },
-    {
-      id: 6,
       title: "Executive Leadership Retreat",
       date: "OCT 10",
       time: "Weekend Stay",
       location: "Lake Como, Italy",
       category: "Retreat",
+      image: "/src/assets/generated/leadership_retreat.png",
       desc: "An exclusive retreat for C-suite alumni to discuss global leadership trends.",
       host: "Executive Board"
+    },
+    {
+      id: 4,
+      title: "Design Thinking Workshop",
+      date: "JULY 05",
+      time: "2:00 PM - 5:00 PM",
+      location: "Virtual Workshop",
+      category: "Workshop",
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
+      desc: "Master the art of user-centric design in this hands-on workshop led by design veterans.",
+      host: "Creative Arts Guild"
+    },
+    {
+      id: 5,
+      title: "Alumni Startup Pitch Night",
+      date: "AUG 18",
+      time: "5:00 PM - 8:00 PM",
+      location: "New York Hub",
+      category: "Networking",
+      image: "https://images.unsplash.com/photo-1475721027187-402ad2989a3b?auto=format&fit=crop&q=80&w=800",
+      desc: "Watch our brightest alumni entrepreneurs pitch to top-tier VC firms.",
+      host: "Entrepreneurship Lab"
+    },
+    {
+      id: 6,
+      title: "AI in Healthcare Webinar",
+      date: "SEPT 22",
+      time: "11:00 AM - 12:30 PM",
+      location: "Global Broadcast",
+      category: "Webinar",
+      image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800",
+      desc: "Explore how artificial intelligence is revolutionizing modern healthcare practices.",
+      host: "Health Science Dept"
     }
   ];
 
   const handleRegister = (eventId, title) => {
     setRegisteredEvents(prev => ({ ...prev, [eventId]: true }));
-    setToast(`Successfully registered for ${title.split(' ')[0]}...`);
+    setToast(`Successfully registered for ${title}`);
     setTimeout(() => setToast(null), 3000);
   };
 
   return (
     <div className="events-page">
-      {/* Immersive Background Shapes */}
-      <motion.div 
-        className="bg-shape bg-shape-1"
-        style={{ background: 'var(--primary)', opacity: 0.05 }}
-        animate={{ 
-          x: [0, 100, 0], 
-          y: [0, 50, 0],
-          scale: [1, 1.2, 1] 
-        }}
-        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div 
-        className="bg-shape bg-shape-2"
-        style={{ background: 'var(--secondary)', opacity: 0.05 }}
-        animate={{ 
-          x: [0, -80, 0], 
-          y: [0, 100, 0],
-          scale: [1, 1.3, 1] 
-        }}
-        transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Background Decorations */}
+      <div className="bg-decorations" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.4 }}>
+        <div style={{ position: 'absolute', top: '10%', right: '-5%', width: '400px', height: '400px', background: 'radial-gradient(circle, var(--blue-100) 0%, transparent 70%)', borderRadius: '50%' }}></div>
+        <div style={{ position: 'absolute', bottom: '10%', left: '-5%', width: '300px', height: '300px', background: 'radial-gradient(circle, var(--blue-50) 0%, transparent 70%)', borderRadius: '50%' }}></div>
+      </div>
 
-      <div className="container directory-container">
+      <div className="container">
         {/* Toast Notification */}
         <AnimatePresence>
           {toast && (
             <motion.div 
-              className="connection-success-toast"
-              style={{ background: '#10b981', color: 'white', border: 'none' }}
+              className="glass"
+              style={{ 
+                position: 'fixed', top: '2rem', left: '50%', transform: 'translateX(-50%)', 
+                padding: '1rem 2rem', borderRadius: 'var(--radius-lg)', zIndex: 2000,
+                display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--blue-200)',
+                color: 'var(--blue-700)', fontWeight: '700', boxShadow: var(--shadow-lg)
+              }}
               initial={{ y: -100, x: '-50%', opacity: 0 }}
               animate={{ y: 0, x: '-50%', opacity: 1 }}
               exit={{ y: -100, x: '-50%', opacity: 0 }}
             >
-              <Check size={24} />
+              <Check size={20} />
               {toast}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Header Section */}
-        <header className="directory-header">
+        {/* Header */}
+        <header className="events-header-section">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
           >
-            <span className="hero-badge"><Sparkles size={16} /> Premium Experiences</span>
-            <h1 className="hero-title">Upcoming Events</h1>
-            <p className="section-subtitle">
-              Celebrate, reconnect, and grow with our curated selection of alumni gatherings. From global summits to intimate workshops.
+            <span className="badge"><Sparkles size={14} /> Premium Experiences</span>
+            <h1 className="hero-title" style={{ marginTop: '1rem' }}>Alumni Events Portal</h1>
+            <p className="section-subtitle" style={{ margin: '1rem auto 0' }}>
+              Connect with fellow graduates, industry experts, and current students at our exclusive global gatherings.
             </p>
           </motion.div>
         </header>
 
         {/* Events Grid */}
-        <div className="alumni-grid">
+        <div className="events-grid">
           {eventsList.map((event, index) => (
             <motion.div 
               key={event.id} 
-              className="event-card premium"
-              initial={{ opacity: 0, y: 50 }}
+              className="event-card-new"
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: index * 0.1, duration: 1, ease: "easeOut" }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
             >
-              <div className="event-image-container">
-                <div className="event-date-badge-premium">
+              <div className="event-image-wrapper">
+                <img src={event.image} alt={event.title} />
+                <div className="event-date-overlay">
                   <span className="month">{event.date.split(' ')[0]}</span>
                   <span className="day">{event.date.split(' ')[1]}</span>
                 </div>
-                {/* Decorative Pattern / Abstract Mesh for Image Placeholder */}
-                <div style={{ width: '100%', height: '100%', background: `linear-gradient(${45 + index * 30}deg, #f1f5f9 0%, #e2e8f0 100%)`, opacity: 0.8 }}></div>
+                <div className="event-category-tag">{event.category}</div>
               </div>
               
-              <div className="event-content-premium">
-                <div className="event-header-group">
-                  <span className="event-category-chip">{event.category}</span>
-                  <h2 className="event-title-premium">{event.title}</h2>
-                </div>
-
-                <div className="event-meta-group">
-                  <div className="event-meta-item">
-                    <Clock size={20} />
+              <div className="event-body-new">
+                <h2 className="event-title-new">{event.title}</h2>
+                
+                <div className="event-info-list">
+                  <div className="event-info-item">
+                    <Clock size={16} />
                     <span>{event.time}</span>
                   </div>
-                  <div className="event-meta-item">
-                    <MapPin size={20} />
+                  <div className="event-info-item">
+                    <MapPin size={16} />
                     <span>{event.location}</span>
                   </div>
-                  <div className="event-meta-item">
-                    <Globe size={20} />
-                    <span>Host: {event.host}</span>
+                  <div className="event-info-item">
+                    <Users size={16} />
+                    <span>{event.host}</span>
                   </div>
                 </div>
 
-                <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>
+                <p className="event-desc-new">
                   {event.desc}
                 </p>
 
-                <div className="event-footer-premium">
+                <div className="event-footer-new">
                   {registeredEvents[event.id] ? (
-                    <button className="btn-rsvp registered w-full">
-                      <Check size={20} />
+                    <div className="btn-rsvp-new registered">
+                      <Check size={18} />
                       Registered
-                    </button>
+                    </div>
                   ) : (
                     <button 
-                      className="btn btn-primary btn-rsvp w-full"
+                      className="btn-rsvp-new primary"
                       onClick={() => handleRegister(event.id, event.title)}
                     >
                       Reserve My Spot
-                      <ArrowRight size={20} />
+                      <ArrowRight size={18} />
                     </button>
                   )}
                 </div>
@@ -202,3 +195,4 @@ const Events = () => {
 };
 
 export default Events;
+
