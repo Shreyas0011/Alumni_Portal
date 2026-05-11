@@ -133,7 +133,7 @@ const Mentorship = () => {
                 <div style={{ display: 'flex' }}>
                   {[1,2,3,4].map(i => (
                     <div key={i} style={{ width: '45px', height: '45px', borderRadius: '50%', border: '3px solid #fff', overflow: 'hidden', marginLeft: i === 1 ? 0 : '-15px', background: '#f1f5f9' }}>
-                      <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="alumni" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={`https://placehold.co/100x100?text=M${i}`} alt="alumni" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   ))}
                 </div>

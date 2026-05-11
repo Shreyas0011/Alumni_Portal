@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { Award, Link2, Mail, MapPin } from 'lucide-react';
 
 const alumni = [
-  { name:'Sarah Jenkins', role:'Senior VP, Tech Global', batch:'2012', location:'San Francisco', img:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400', achievement:'AI Ethics Pioneer', field:'Technology' },
-  { name:'David Chen', role:'Founder, EcoStream', batch:'2015', location:'Singapore', img:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400', achievement:'Forbes 30 Under 30', field:'Entrepreneurship' },
-  { name:'Elena Rodriguez', role:'Director of Policy, UN', batch:'2010', location:'Geneva', img:'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400', achievement:'Global Impact Award', field:'Policy' },
-  { name:'Marcus Thorne', role:'Chief Architect, SpaceNext', batch:'2014', location:'Houston', img:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400', achievement:'Innovator of the Year', field:'Engineering' },
+  { name:'Sarah Jenkins', role:'Senior VP, Tech Global', batch:'2012', location:'San Francisco', img:'https://placehold.co/400x400?text=SJ', achievement:'AI Ethics Pioneer', field:'Technology' },
+  { name:'David Chen', role:'Founder, EcoStream', batch:'2015', location:'Singapore', img:'https://placehold.co/400x400?text=DC', achievement:'Forbes 30 Under 30', field:'Entrepreneurship' },
+  { name:'Elena Rodriguez', role:'Director of Policy, UN', batch:'2010', location:'Geneva', img:'https://placehold.co/400x400?text=ER', achievement:'Global Impact Award', field:'Policy' },
+  { name:'Marcus Thorne', role:'Chief Architect, SpaceNext', batch:'2014', location:'Houston', img:'https://placehold.co/400x400?text=MT', achievement:'Innovator of the Year', field:'Engineering' },
 ];
 
 const FeaturedAlumni = () => (

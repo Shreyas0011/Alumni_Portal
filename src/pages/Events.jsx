@@ -17,7 +17,7 @@ const Events = () => {
       time: "10:00 AM - 4:00 PM",
       location: "San Francisco / Virtual",
       category: "Summit",
-      image: "/events/tech_summit.png",
+      image: "https://placehold.co/800x600?text=Tech+Summit",
       desc: "Join top industry leaders for a day of networking, innovation, and career insights. Featuring keynotes from Silicon Valley pioneers and interactive breakout sessions.",
       host: "Alumni Tech Council",
       featured: true
@@ -29,7 +29,7 @@ const Events = () => {
       time: "6:30 PM Onwards",
       location: "Main Campus Great Hall",
       category: "Reunion",
-      image: "/events/gala_dinner.png",
+      image: "https://placehold.co/800x600?text=Gala+Dinner",
       desc: "Celebrate 50 years of excellence with a grand gala dinner, departmental tours, and a special performance by the alumni orchestra.",
       host: "University Events"
     },
@@ -40,7 +40,7 @@ const Events = () => {
       time: "Weekend Stay",
       location: "Lake Como, Italy",
       category: "Retreat",
-      image: "/events/leadership_retreat.png",
+      image: "https://placehold.co/800x600?text=Leadership+Retreat",
       desc: "An exclusive retreat for C-suite alumni to discuss global leadership trends in an intimate, luxury setting.",
       host: "Executive Board"
     },
@@ -51,7 +51,7 @@ const Events = () => {
       time: "2:00 PM - 5:00 PM",
       location: "Virtual Workshop",
       category: "Workshop",
-      image: "/events/workshop.png",
+      image: "https://placehold.co/800x600?text=Workshop",
       desc: "Master the art of user-centric design in this hands-on workshop led by design veterans from top global agencies.",
       host: "Creative Arts Guild"
     },
@@ -62,7 +62,7 @@ const Events = () => {
       time: "5:00 PM - 8:00 PM",
       location: "New York Hub",
       category: "Networking",
-      image: "/events/networking.png",
+      image: "https://placehold.co/800x600?text=Pitch+Night",
       desc: "Watch our brightest alumni entrepreneurs pitch to top-tier VC firms. Networking reception to follow.",
       host: "Entrepreneurship Lab"
     },
@@ -73,7 +73,7 @@ const Events = () => {
       time: "11:00 AM - 12:30 PM",
       location: "Global Broadcast",
       category: "Webinar",
-      image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800",
+      image: "https://placehold.co/800x600?text=Webinar",
       desc: "Explore how artificial intelligence is revolutionizing modern healthcare practices in this expert-led webinar.",
       host: "Health Science Dept"
     }
