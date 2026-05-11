@@ -26,11 +26,10 @@ const Navbar = () => {
         {/* Brand */}
         <div className="sidebar-brand">
           <Link to="/" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.625rem', textDecoration:'none' }}>
-            <div style={{ 
-              width: 58, height: 58, borderRadius: '12px', background: 'var(--blue-700)', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', 
-              color: 'white', fontWeight: 900, fontSize: '1.5rem', boxShadow: '0 4px 12px rgba(37,99,235,0.2)' 
-            }}>T</div>
+            <motion.img src="/logo.png" alt="Transcend"
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
+              style={{ height: 58, width: 'auto' }}
+            />
             <div className="sidebar-brand-text">
               <div className="title">Alumni Connect</div>
               <div className="sub">Portal · Transcend</div>
@@ -86,11 +85,7 @@ const Navbar = () => {
       {/* ── MOBILE TOPBAR ── */}
       <div className="mobile-topbar">
         <Link to="/" style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
-          <div style={{ 
-            width: 36, height: 36, borderRadius: '8px', background: 'var(--blue-700)', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            color: 'white', fontWeight: 900, fontSize: '1rem' 
-          }}>T</div>
+          <img src="/logo.png" alt="Transcend" style={{ height: 36 }} />
           <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--blue-900)' }}>Alumni Connect</span>
         </Link>
         <button className="mobile-toggle" onClick={() => setMobileOpen(o => !o)}>
