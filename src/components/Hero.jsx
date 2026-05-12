@@ -35,10 +35,13 @@ const Hero = () => (
 
         <div className="hero-btns">
           <motion.div whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}>
-            <Link to="/register" className="btn btn-primary">Get Started Free <ArrowRight size={16}/></Link>
+            <Link to="/portal" className="btn btn-primary" style={{ background:'var(--blue-800)' }}>Go to Portals <ArrowRight size={16}/></Link>
           </motion.div>
           <motion.div whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}>
             <Link to="/directory" className="btn btn-outline">Browse Alumni</Link>
+          </motion.div>
+          <motion.div whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}>
+            <Link to="/register" className="btn btn-ghost">Create Account</Link>
           </motion.div>
         </div>
 

@@ -96,6 +96,15 @@ const Registration = () => {
               </div>
 
               <div className="input-group">
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>I am a...</label>
+                <select required style={{ width: '100%', padding: '1rem', background: 'rgba(15,23,42,0.03)', border: '1px solid var(--border-subtle)', borderRadius: '10px', color: 'var(--text-main)', outline: 'none' }}>
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher / Faculty</option>
+                  <option value="alumni">Alumnus / Alumna</option>
+                </select>
+              </div>
+
+              <div className="input-group">
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Professional Bio</label>
                 <textarea rows="4" placeholder="Tell us about your journey..." style={{ width: '100%', padding: '1rem', background: 'rgba(15,23,42,0.03)', border: '1px solid var(--border-subtle)', borderRadius: '10px', color: 'var(--text-main)', resize: 'none', outline: 'none' }}></textarea>
               </div>

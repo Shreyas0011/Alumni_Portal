@@ -230,3 +230,37 @@ select option{background:var(--white);color:var(--text-main);}
   .container{padding:0 1.25rem;}
   .footer .footer-cols{grid-template-columns:1fr 1fr!important;}
 }
+
+/* ─── Portal Selection ─── */
+.portal-card {
+  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease) !important;
+}
+.portal-card:hover {
+  transform: translateY(-10px) !important;
+  border-color: var(--blue-400) !important;
+  box-shadow: 0 20px 40px rgba(37,99,235,0.12) !important;
+}
+.portal-card:hover .portal-icon {
+  background: var(--white) !important;
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+}
+/* --- Role Themes --- */
+.theme-student { --primary: var(--blue-600); --primary-dark: var(--blue-700); }
+.theme-teacher { --primary: #059669; --primary-dark: #047857; }
+.theme-alumni { --primary: #1e3a8a; --primary-dark: #172554; }
+.theme-student .text-gradient { background: linear-gradient(135deg, var(--blue-600), var(--blue-400)) !important; -webkit-background-clip: text !important; }
+.theme-teacher .text-gradient { background: linear-gradient(135deg, #059669, #34d399) !important; -webkit-background-clip: text !important; }
+.theme-alumni .text-gradient { background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important; -webkit-background-clip: text !important; }
+.theme-student .sidebar-link.active .sidebar-link-icon { background: var(--blue-100) !important; color: var(--blue-600) !important; }
+.theme-teacher .sidebar-link.active .sidebar-link-icon { background: #dcfce7 !important; color: #059669 !important; }
+.theme-alumni .sidebar-link.active .sidebar-link-icon { background: #dbeafe !important; color: #1e3a8a !important; }
+.theme-student .sidebar-link.active { color: var(--blue-600) !important; background: var(--blue-50) !important; }
+.theme-teacher .sidebar-link.active { color: #059669 !important; background: #f0fdf4 !important; }
+.theme-alumni .sidebar-link.active { color: #1e3a8a !important; background: #eff6ff !important; }
+.theme-student .btn-primary { background: var(--blue-600) !important; }
+.theme-teacher .btn-primary { background: #059669 !important; }
+.theme-alumni .btn-primary { background: #1e3a8a !important; }
+
+.mentor-row:hover, .peer-card:hover { border-color: var(--blue-400) !important; background: var(--white) !important; transform: translateX(5px); box-shadow: var(--shadow-md); }
+.resource-card:hover { border-color: var(--blue-400) !important; background: var(--blue-50) !important; transform: translateY(-5px); }
