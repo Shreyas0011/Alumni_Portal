@@ -10,9 +10,10 @@ import Events from './pages/Events';
 import AdminDashboard from './pages/AdminDashboard';
 import PortalSelection from './pages/PortalSelection';
 import Login from './pages/Login';
+import ProfileCompletion from './pages/ProfileCompletion';
 import StudentDashboard from './pages/dashboards/StudentDashboard';
-import TeacherDashboard from './pages/dashboards/TeacherDashboard';
 import AlumniDashboard from './pages/dashboards/AlumniDashboard';
+import AnimatedBackground from './components/AnimatedBackground';
 import { useAuth } from './context/AuthContext';
 
 const Layout = ({ children }) => {
@@ -20,7 +21,7 @@ const Layout = ({ children }) => {
   const themeClass = user ? `theme-${user.role}` : 'theme-guest';
 
   return (
-    <div className={`app-container ${themeClass}`}>
+    <div className={`app-container ${themeClass}`} style={{ position: 'relative', zIndex: 1 }}>
       <Navbar />
       <div className="main-wrapper">
         <main className="main-content">
@@ -36,26 +37,31 @@ function App() {
   const { user } = useAuth();
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout><PortalSelection /></Layout>} />
-      <Route path="/home" element={<Layout><Home /></Layout>} />
-      <Route path="/directory" element={<Layout><Directory /></Layout>} />
-      <Route path="/register" element={<Layout><Registration /></Layout>} />
-      <Route path="/mentorship" element={<Layout><Mentorship /></Layout>} />
-      <Route path="/events" element={<Layout><Events /></Layout>} />
-      
-      {/* Portal Routes */}
-      <Route path="/login/student" element={<Login role="student" />} />
-      <Route path="/login/teacher" element={<Login role="teacher" />} />
-      <Route path="/login/alumni" element={<Login role="alumni" />} />
+    <>
+      <AnimatedBackground />
+      <Routes>
+        <Route path="/" element={<Layout><PortalSelection /></Layout>} />
+        <Route path="/home" element={<Layout><Home /></Layout>} />
+        <Route path="/directory" element={<Layout><Directory /></Layout>} />
+        <Route path="/register" element={<Layout><Registration /></Layout>} />
+        <Route path="/mentorship" element={<Layout><Mentorship /></Layout>} />
+        <Route path="/events" element={<Layout><Events /></Layout>} />
+        
+        {/* Portal Routes */}
+        <Route path="/login/student" element={<Login role="student" />} />
+        <Route path="/login/alumni" element={<Login role="alumni" />} />
+        <Route path="/login/admin" element={<Login role="admin" />} />
 
-      {/* Role-specific Dashboards */}
-      <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
-      <Route path="/teacher/dashboard" element={<Layout><TeacherDashboard /></Layout>} />
-      <Route path="/alumni/dashboard" element={<Layout><AlumniDashboard /></Layout>} />
-      
-      <Route path="/admin" element={<AdminDashboard />} />
-    </Routes>
+        {/* Profile Completion */}
+        <Route path="/profile/complete" element={<Layout><ProfileCompletion /></Layout>} />
+
+        {/* Role-specific Dashboards */}
+        <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
+        <Route path="/alumni/dashboard" element={<Layout><AlumniDashboard /></Layout>} />
+        
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Routes>
+    </>
   );
 }
 

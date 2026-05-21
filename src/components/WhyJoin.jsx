@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import { Shield, Zap, Globe, Briefcase, Award, Users, ArrowRight } from 'lucide-react';
 
 const benefits = [
-  { title:'Global Mentorship', desc:'Get direct guidance from industry veterans who have navigated the path before you.', icon:<Users size={20}/>, color:'#2563eb' },
-  { title:'Exclusive Job Board', desc:'Access a high-trust referral network with curated roles from alumni-led companies.', icon:<Briefcase size={20}/>, color:'#0891b2' },
-  { title:'Global Networking', desc:'Connect with professionals spanning 120+ countries and every major industry.', icon:<Globe size={20}/>, color:'#7c3aed' },
-  { title:'Workshops & Webinars', desc:'Attend exclusive learning events hosted by senior alumni and industry experts.', icon:<Zap size={20}/>, color:'#d97706' },
-  { title:'Verified Community', desc:'A professional, verified-only space built on trust and meaningful collaboration.', icon:<Shield size={20}/>, color:'#059669' },
-  { title:'Spotlight Recognition', desc:'Get featured in our monthly alumni spotlight and gain visibility in the network.', icon:<Award size={20}/>, color:'#dc2626' },
+  { title:'Finance & CA Mentorship', desc:'Get direct guidance from seasoned Chartered Accountants, CFAs, and investment bankers who have walked this path.', icon:<Users size={20}/>, color:'#2563eb' },
+  { title:'Top Corporate Referrals', desc:'Access exclusive business roles and referrals from alumni working at Big 4 accounting firms, investment banks, and conglomerates.', icon:<Briefcase size={20}/>, color:'#0891b2' },
+  { title:'Global Commerce Network', desc:'Connect with commerce and business professionals across global financial hubs like New York, London, Singapore, and Mumbai.', icon:<Globe size={20}/>, color:'#7c3aed' },
+  { title:'Budget & Business Webinars', desc:'Attend learning events on financial modeling, Union Budget analyses, GST reforms, and corporate laws hosted by experts.', icon:<Zap size={20}/>, color:'#d97706' },
+  { title:'Verified Alumni Directory', desc:'An authenticated-only database where every member is verified by their commerce roll number and batch details.', icon:<Shield size={20}/>, color:'#059669' },
+  { title:'Corporate Spotlights', desc:'Gain visibility by getting featured in our monthly alumni newsletter highlighting achievements in business and finance.', icon:<Award size={20}/>, color:'#dc2626' },
 ];
 
 const WhyJoin = () => (

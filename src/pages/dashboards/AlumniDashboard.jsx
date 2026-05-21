@@ -1,87 +1,733 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
 import { Link } from 'react-router-dom';
 import DashboardHeader from '../../components/DashboardHeader';
-import NotificationToast from '../../components/NotificationToast';
-import { Heart, Users, Briefcase, MessageSquare, Award, Globe } from 'lucide-react';
+import { Heart, Users, Briefcase, MessageSquare, Award, Globe, Cake, Trophy, Clock, Send, CheckCircle, AlertCircle, CreditCard, Calendar, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import useRazorpay from '../../hooks/useRazorpay';
 
 const AlumniDashboard = () => {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
+  const { 
+    achievements, posts, addPost, getTodayBirthdays, 
+    events, registerForEvent, unregisterFromEvent, broadcasts,
+    wishedAlumni, automationSettings 
+  } = useData();
+  const openRazorpay = useRazorpay();
+  const [paymentToast, setPaymentToast] = useState('');
+  const [postText, setPostText] = useState('');
+  const [postSubmitted, setPostSubmitted] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Achievement Post states
+  const [isAchievementPost, setIsAchievementPost] = useState(true);
+  const [achTitle, setAchTitle] = useState('');
+  const [achCategory, setAchCategory] = useState('General');
+
+  // Profile Form State
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    batch: '',
+    branch: '',
+    bio: '',
+    company: '',
+    profession: '',
+    linkedin: ''
+  });
+  const [profileSaved, setProfileSaved] = useState(false);
+
+  // Synchronize form when user loads or updates
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || '',
+        phone: user.phone || '',
+        email: user.email || '',
+        batch: user.batch || '',
+        branch: user.branch || '',
+        bio: user.bio || '',
+        company: user.company || '',
+        profession: user.profession || user.role || '',
+        linkedin: user.linkedin || ''
+      });
+    }
+  }, [user]);
+
+  const handleProfileSave = (e) => {
+    e.preventDefault();
+    updateProfile(profileForm);
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 4000);
+  };
+
+  const todayBirthdays = getTodayBirthdays();
+  const approvedPosts = posts.filter(p => p.status === 'approved');
+  const myPendingPosts = posts.filter(p => p.status === 'pending' && p.authorId === user?.id);
+
+  const handlePostSubmit = () => {
+    if (isAchievementPost) {
+      if (!achTitle.trim() || !postText.trim()) return;
+      addPost({
+        authorId: user?.id,
+        authorName: user?.name,
+        authorBatch: user?.batch || '2020',
+        title: achTitle,
+        category: achCategory,
+        content: postText,
+        isAchievement: true
+      });
+      setAchTitle('');
+      setAchCategory('General');
+    } else {
+      if (!postText.trim()) return;
+      addPost({
+        authorId: user?.id,
+        authorName: user?.name,
+        authorBatch: user?.batch || '2020',
+        content: postText,
+        isAchievement: false
+      });
+    }
+    setPostText('');
+    setPostSubmitted(true);
+    setTimeout(() => setPostSubmitted(false), 4000);
+  };
+
+  const handleRazorpay = (event) => {
+    const alreadyRegistered = event.registrations?.some(r => r.userId === user?.id);
+    if (alreadyRegistered) return;
+    if (event.fee === 0) {
+      registerForEvent(event.id, user?.id, user?.name);
+      setPaymentToast(`Registered for ${event.title}!`);
+      setTimeout(() => setPaymentToast(''), 3000);
+      return;
+    }
+    openRazorpay({
+      amount: event.fee,
+      eventTitle: event.title,
+      description: `Registration for ${event.title}`,
+      user,
+      onSuccess: () => {
+        registerForEvent(event.id, user?.id, user?.name);
+        setPaymentToast(`Payment successful! Registered for ${event.title} 🎉`);
+        setTimeout(() => setPaymentToast(''), 4000);
+      },
+      onFailure: (msg) => {
+        setPaymentToast(`Payment failed: ${msg}`);
+        setTimeout(() => setPaymentToast(''), 4000);
+      },
+    });
+  };
+
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const formatTime = (d) => d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Never';
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: <Globe size={16} /> },
+    { id: 'achievements', label: 'Achievements', icon: <Trophy size={16} /> },
+    { id: 'feed', label: 'Community Feed', icon: <MessageSquare size={16} /> },
+    { id: 'events', label: 'Events', icon: <Calendar size={16} /> },
+    { id: 'birthdays', label: 'Birthdays', icon: <Cake size={16} /> },
+    { id: 'profile', label: 'My Profile', icon: <Users size={16} /> },
+  ];
+
+  const commerceBranches = [
+    'B.Com Accounts & Finance',
+    'B.Com Honors',
+    'B.Com Corporate Secretaryship',
+    'B.Com Computer Applications',
+    'B.Com Professional Accounting',
+    'M.Com Finance & Taxation',
+    'BBA Finance & Marketing',
+    'MBA Financial Management',
+    'Other Business Specialization'
+  ];
 
   return (
     <div className="dashboard-container" style={{ padding: '2.5rem' }}>
-      <DashboardHeader 
-        title={`Welcome Home, ${user?.name?.split(' ')[0] || 'Alumnus'}! 🏛️`}
-        subtitle="Stay connected, give back, and explore your global network."
-      />
+      <DashboardHeader title={`Welcome, ${user?.name?.split(' ')[0] || 'Alumnus'}! 🏛️`} subtitle="Your alumni dashboard — stay connected and engaged." />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <div className="card" style={{ background: 'linear-gradient(135deg, var(--blue-900), var(--blue-700))', color: '#fff', border: 'none' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-            <Award size={32} style={{ opacity: 0.8 }} />
-            <div style={{ fontSize: '0.7rem', fontWeight: '700', padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.2)', borderRadius: '6px' }}>SILVER DONOR</div>
-          </div>
-          <div style={{ fontSize: '0.8rem', opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Total Contribution</div>
-          <div style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '1.5rem' }}>$12,450.00</div>
-          <button className="btn btn-sm btn-white" style={{ width: '100%' }}>Manage Giving</button>
+      {/* Payment Toast */}
+      <AnimatePresence>
+        {paymentToast && (
+          <motion.div
+            initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -80, opacity: 0 }}
+            style={{ position: 'fixed', top: '1.5rem', left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid var(--blue-100)', padding: '0.875rem 2rem', borderRadius: '99px', zIndex: 9999, fontWeight: '700', fontSize: '0.875rem', color: paymentToast.startsWith('Payment failed') ? '#dc2626' : '#059669', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', whiteSpace: 'nowrap' }}
+          >
+            {paymentToast.startsWith('Payment failed') ? '❌' : <CheckCircle size={16} />} {paymentToast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Profile Status Banner */}
+      {user?.profileStatus === 'pending' && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Clock size={20} style={{ color: '#92400e' }} />
+          <div><span style={{ fontWeight: '700', color: '#92400e' }}>Profile Pending Approval</span><span style={{ color: '#a16207', fontSize: '0.85rem' }}> — Some features are limited until admin verifies your profile.</span></div>
+        </motion.div>
+      )}
+
+      {/* Login/Profile Info Bar */}
+      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
+          <Clock size={16} style={{ color: 'var(--blue-600)' }} />
+          <span style={{ color: 'var(--text-muted)' }}>Last Login:</span>
+          <span style={{ fontWeight: '700' }}>{formatTime(user?.lastLogin)}</span>
         </div>
-
-        <div className="card">
-          <div className="feature-icon" style={{ background: '#fef2f2', color: '#ef4444' }}><Heart size={20} /></div>
-          <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>Mentoring</h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>3 students waiting for your advice.</p>
-          <button className="btn btn-sm btn-outline" style={{ width: '100%' }}>Review Requests</button>
-        </div>
-
-        <div className="card">
-          <div className="feature-icon" style={{ background: '#f0f9ff', color: '#0ea5e9' }}><Globe size={20} /></div>
-          <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>Chapter News</h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>New chapter opening in Singapore.</p>
-          <button className="btn btn-sm btn-outline" style={{ width: '100%' }}>Read More</button>
+        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
+          <CheckCircle size={16} style={{ color: '#059669' }} />
+          <span style={{ color: 'var(--text-muted)' }}>Last Profile Update:</span>
+          <span style={{ fontWeight: '700' }}>{formatTime(user?.lastProfileUpdate)}</span>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem' }}>Peers in your Industry</h3>
-            <button className="btn btn-sm btn-ghost">Search Directory</button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      {/* Tab Navigation */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
+        {tabs.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', borderRadius: '99px', border: '1px solid', borderColor: activeTab === tab.id ? 'var(--blue-700)' : 'var(--border)', background: activeTab === tab.id ? 'var(--blue-700)' : '#fff', color: activeTab === tab.id ? '#fff' : 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+            {tab.icon} {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* OVERVIEW TAB */}
+      {activeTab === 'overview' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          {/* Quick Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
             {[
-              { name: 'David Miller', role: 'CTO @ FinTech', location: 'London' },
-              { name: 'Elena Rossi', role: 'Design Lead @ Airbnb', location: 'SF' },
-              { name: 'Sam Chen', role: 'DevOps @ AWS', location: 'Seattle' },
-              { name: 'Aisha Khan', role: 'Data Scientist', location: 'Dubai' }
-            ].map((p, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid var(--border)', borderRadius: '16px', transition: 'var(--transition)' }} className="peer-card">
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--gray-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: 'var(--blue-700)' }}>{p.name[0]}</div>
-                <div>
-                  <div style={{ fontWeight: '700', fontSize: '0.85rem' }}>{p.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{p.role}</div>
-                </div>
+              { label: 'Achievements', value: achievements.length, icon: <Trophy size={20} />, color: '#f59e0b', bg: '#fffbeb' },
+              { label: 'Community Posts', value: approvedPosts.length, icon: <MessageSquare size={20} />, color: '#3b82f6', bg: '#eff6ff' },
+              { label: 'Upcoming Events', value: events.length, icon: <Calendar size={20} />, color: '#8b5cf6', bg: '#f5f3ff' },
+              { label: "Today's Birthdays", value: todayBirthdays.length, icon: <Cake size={20} />, color: '#ec4899', bg: '#fdf2f8' },
+            ].map((s, i) => (
+              <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div style={{ width: 48, height: 48, borderRadius: '14px', background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</div>
+                <div><div style={{ fontSize: '1.5rem', fontWeight: '800' }}>{s.value}</div><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.label}</div></div>
               </div>
             ))}
           </div>
-        </div>
+          {/* Recent Broadcasts */}
+          {broadcasts.length > 0 && (
+            <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid var(--blue-700)' }}>
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertCircle size={18} style={{ color: 'var(--blue-700)' }} /> Latest Announcements</h3>
+              {broadcasts.slice(0, 3).map(bc => (
+                <div key={bc.id} style={{ padding: '1rem', background: 'var(--gray-50)', borderRadius: '12px', marginBottom: '0.75rem' }}>
+                  <div style={{ fontWeight: '700', marginBottom: '0.25rem' }}>{bc.title}</div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{bc.message}</p>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{formatDate(bc.createdAt)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
 
-        <div className="card">
-          <h3 style={{ marginBottom: '1.5rem' }}>Share an Update</h3>
-          <div style={{ position: 'relative', marginBottom: '1rem' }}>
-            <textarea 
-              placeholder="Tell your peers what you've been up to..." 
-              style={{ height: '120px', padding: '1rem', background: 'var(--gray-50)', border: '1px solid var(--border)', borderRadius: '12px', resize: 'none' }}
-            ></textarea>
-            <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', display: 'flex', gap: '0.5rem' }}>
-              <button className="btn-icon btn-sm btn-ghost"><Globe size={14} /></button>
+      {/* ACHIEVEMENTS TAB */}
+      {activeTab === 'achievements' && (() => {
+        const alumniAchievements = posts.filter(p => p.status === 'approved' && p.isAchievement);
+        return (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '1.5rem' }}>🏆 Institution Achievements</h3>
+            {achievements.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No achievements posted yet.</div>
+            ) : (
+              <div style={{ display: 'grid', gap: '1.25rem' }}>
+                {achievements.map(ach => (
+                  <div key={ach.id} className="card" style={{ borderLeft: '4px solid var(--blue-700)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div>
+                        <span className="tag" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>{ach.category}</span>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: '700' }}>{ach.title}</h4>
+                      </div>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>{formatDate(ach.date)}</span>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.7' }}>{ach.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginTop: '3rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Award size={22} style={{ color: '#f59e0b' }} /> Alumni Career Milestones
+            </h3>
+            {alumniAchievements.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                No alumni milestones have been posted yet.
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                {alumniAchievements.map(ach => (
+                  <div 
+                    key={ach.id} 
+                    className="card" 
+                    style={{ 
+                      borderLeft: '4px solid #f59e0b',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      height: '100%'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <span className="tag" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', fontSize: '0.72rem' }}>
+                          {ach.category}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                          {formatDate(ach.createdAt)}
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--blue-900)', marginBottom: '0.5rem' }}>
+                        🏆 {ach.title}
+                      </h4>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                        {ach.content}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: 'auto' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--blue-100)', color: 'var(--blue-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '0.8rem' }}>
+                        {ach.authorName?.[0]}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '0.82rem', color: 'var(--text-main)' }}>{ach.authorName}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Class of {ach.authorBatch}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        );
+      })()}
+
+      {/* COMMUNITY FEED TAB */}
+      {activeTab === 'feed' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          {/* Create Post */}
+          <div className="card" style={{ marginBottom: '2rem', padding: '2rem' }}>
+            <h3 style={{ marginBottom: '1.25rem', fontSize: '1.2rem', fontWeight: '800' }}>Share with Community</h3>
+            
+            {/* Toggle button type */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsAchievementPost(true)}
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: '8px', 
+                  border: '1px solid',
+                  borderColor: isAchievementPost ? 'var(--blue-700)' : 'var(--border)',
+                  background: isAchievementPost ? 'var(--blue-50)' : '#fff',
+                  color: isAchievementPost ? 'var(--blue-900)' : 'var(--text-muted)',
+                  fontWeight: '700',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer'
+                }}
+              >
+                🏆 Share Achievement / Milestone
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setIsAchievementPost(false)}
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: '8px', 
+                  border: '1px solid',
+                  borderColor: !isAchievementPost ? 'var(--blue-700)' : 'var(--border)',
+                  background: !isAchievementPost ? 'var(--blue-50)' : '#fff',
+                  color: !isAchievementPost ? 'var(--blue-900)' : 'var(--text-muted)',
+                  fontWeight: '700',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer'
+                }}
+              >
+                💬 General Update
+              </button>
+            </div>
+
+            {isAchievementPost ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.25rem' }}>Achievement Title</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Cleared CA Final with All India Rank!"
+                      value={achTitle}
+                      onChange={e => setAchTitle(e.target.value)}
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.25rem' }}>Category</label>
+                    <select 
+                      value={achCategory}
+                      onChange={e => setAchCategory(e.target.value)}
+                      style={{ padding: '0.75rem 1rem', width: '100%', border: '1px solid var(--border)', borderRadius: '10px' }}
+                    >
+                      <option value="CA / Professional Milestone">CA Milestone</option>
+                      <option value="CFA / Financial Analyst">CFA Milestone</option>
+                      <option value="Corporate Promotion">Promotion</option>
+                      <option value="New Business Venture">Entrepreneurship</option>
+                      <option value="Academic / Research">Academic</option>
+                      <option value="General Career Update">General</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.25rem' }}>Achievement details / story</label>
+                  <textarea 
+                    placeholder="Describe your achievement journey, challenges faced, or tips for juniors..." 
+                    value={postText} 
+                    onChange={e => setPostText(e.target.value)} 
+                    style={{ height: '80px', padding: '0.75rem 1rem', borderRadius: '10px', resize: 'none', background: 'var(--gray-50)', width: '100%' }} 
+                  />
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.25rem' }}>Your update / post</label>
+                <textarea 
+                  placeholder="Share a general update, ask a question, or start a discussion..." 
+                  value={postText} 
+                  onChange={e => setPostText(e.target.value)} 
+                  style={{ height: '80px', padding: '0.75rem 1rem', borderRadius: '10px', resize: 'none', background: 'var(--gray-50)', width: '100%' }} 
+                />
+              </div>
+            )}
+
+            {postSubmitted && (
+              <div style={{ color: '#059669', fontSize: '0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <CheckCircle size={16} /> Submitted successfully! It will appear on the feed once approved by the admin.
+              </div>
+            )}
+            {myPendingPosts.length > 0 && (
+              <div style={{ color: '#b45309', fontSize: '0.8rem', marginBottom: '0.75rem' }}>
+                📋 You have {myPendingPosts.length} post(s) / achievement(s) pending admin review.
+              </div>
+            )}
+
+            <button 
+              className="btn btn-primary" 
+              style={{ background: 'var(--blue-800)', width: '220px' }} 
+              onClick={handlePostSubmit} 
+              disabled={isAchievementPost ? (!achTitle.trim() || !postText.trim()) : !postText.trim()}
+            >
+              <Send size={16} /> Submit for Approval
+            </button>
+          </div>
+
+          {/* Approved Posts */}
+          <h3 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '1.25rem' }}>Community Updates & Achievements</h3>
+          {approvedPosts.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No updates shared yet.</div>
+          ) : (
+            <div style={{ display: 'grid', gap: '1.25rem' }}>
+              {approvedPosts.map(post => (
+                <div 
+                  key={post.id} 
+                  className="card" 
+                  style={{ 
+                    borderLeft: post.isAchievement ? '4px solid #f59e0b' : '1px solid var(--border)',
+                    background: post.isAchievement ? 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)' : '#fff'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--blue-100)', color: 'var(--blue-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{post.authorName?.[0]}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{post.authorName}</div>
+                        {post.isAchievement && (
+                          <span className="tag" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Trophy size={12} /> {post.category}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Batch {post.authorBatch} · {formatDate(post.createdAt)}</div>
+                    </div>
+                  </div>
+                  {post.title && <h4 style={{ fontWeight: '800', fontSize: '1.05rem', color: 'var(--blue-900)', marginBottom: '0.5rem' }}>🏆 {post.title}</h4>}
+                  <p style={{ color: 'var(--text-main)', fontSize: '0.925rem', lineHeight: '1.7' }}>{post.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* EVENTS TAB */}
+      {activeTab === 'events' && (() => {
+        const handleDashboardUnregister = (evt) => {
+          unregisterFromEvent(evt.id, user?.id);
+          setPaymentToast(`Unregistered from ${evt.title}`);
+          setTimeout(() => setPaymentToast(''), 3000);
+        };
+        return (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '1.5rem' }}>📅 Upcoming Events</h3>
+            <div style={{ display: 'grid', gap: '1.25rem' }}>
+              {events.map(evt => {
+                const registered = evt.registrations?.some(r => r.userId === user?.id);
+                return (
+                  <div key={evt.id} className="card" style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '1.5rem', overflow: 'hidden', padding: 0 }}>
+                    <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: '180px' }} />
+                    <div style={{ padding: '1.5rem 1.5rem 1.5rem 0' }}>
+                      <span className="tag" style={{ marginBottom: '0.75rem', display: 'inline-block' }}>{evt.category}</span>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '0.5rem' }}>{evt.title}</h4>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.6' }}>{evt.description}</p>
+                      <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                        <span>📅 {formatDate(evt.date)}</span>
+                        <span>🕒 {evt.time}</span>
+                        <span>📍 {evt.location}</span>
+                      </div>
+                      {registered ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#059669', fontWeight: '700', fontSize: '0.9rem' }}>
+                            <CheckCircle size={18} /> Registered Successfully
+                          </div>
+                          <button
+                            style={{ padding: '0.5rem 1.1rem', borderRadius: '10px', border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer' }}
+                            onClick={() => handleDashboardUnregister(evt)}
+                          >
+                            Unregister
+                          </button>
+                        </div>
+                      ) : (
+                        <button className="btn btn-primary" onClick={() => handleRazorpay(evt)}>
+                          <CreditCard size={16} /> {evt.fee > 0 ? `Register & Pay ₹${evt.fee}` : 'Register Free'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+      })()}
+
+      {/* BIRTHDAYS TAB */}
+      {activeTab === 'birthdays' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '1.5rem' }}>🎂 Today's Birthdays</h3>
+          {todayBirthdays.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+              <Cake size={48} style={{ color: 'var(--text-dim)', marginBottom: '1rem' }} />
+              <p style={{ color: 'var(--text-muted)' }}>No birthdays today. Check back tomorrow!</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '1.25rem' }}>
+              {todayBirthdays.map((person, i) => {
+                const todayKey = new Date().toISOString().split('T')[0];
+                const isAutoWished = wishedAlumni?.[todayKey]?.includes(person.id);
+                return (
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="card" style={{ background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)', border: '1px solid #fbcfe8', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '-20px', right: '-10px', fontSize: '6rem', opacity: 0.1 }}>🎂</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', position: 'relative', zIndex: 1 }}>
+                      <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #ec4899, #f472b6)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.25rem' }}>{person.name[0]}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <h4 style={{ fontWeight: '800', fontSize: '1.1rem', marginBottom: '0.25rem' }}>🎉 Happy Birthday, {person.name}!</h4>
+                          {isAutoWished && (
+                            <span style={{ fontSize: '0.72rem', background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#fff', padding: '0.25rem 0.6rem', borderRadius: '8px', fontWeight: '700', boxShadow: '0 2px 6px rgba(219, 39, 119, 0.25)', display: 'inline-flex', alignItems: 'center', gap: '0.15rem' }}>
+                              ✨ Wished by Alumni Connect
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '0.85rem', color: '#9d174d' }}>{person.profession} at {person.company} · Batch {person.batch}</p>
+                        <p style={{ fontSize: '0.9rem', color: '#be185d', fontStyle: 'italic', marginTop: '0.5rem' }}>{person.birthdayMessage}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* MY PROFILE TAB */}
+      {activeTab === 'profile' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2.5rem', alignItems: 'start' }}>
+            {/* Profile Editing Form */}
+            <div className="card" style={{ padding: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '1.5rem', color: 'var(--text-main)' }}>Edit Profile Information</h3>
+              <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Full Name</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={profileForm.name} 
+                      onChange={e => setProfileForm({...profileForm, name: e.target.value})} 
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Phone Number</label>
+                    <input 
+                      type="tel" 
+                      placeholder="9876543210" 
+                      required 
+                      pattern="[0-9]{10}"
+                      maxLength="10"
+                      value={profileForm.phone} 
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setProfileForm({...profileForm, phone: val});
+                      }} 
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Email Address</label>
+                    <input 
+                      type="email" 
+                      required 
+                      value={profileForm.email} 
+                      onChange={e => setProfileForm({...profileForm, email: e.target.value})} 
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Pass out Batch</label>
+                    <input 
+                      type="number" 
+                      required 
+                      value={profileForm.batch} 
+                      onChange={e => setProfileForm({...profileForm, batch: e.target.value})} 
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Designation / Profession</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Tax Associate / Analyst" 
+                      value={profileForm.profession} 
+                      onChange={e => setProfileForm({...profileForm, profession: e.target.value})} 
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Company / Organization</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Deloitte / EY" 
+                      value={profileForm.company} 
+                      onChange={e => setProfileForm({...profileForm, company: e.target.value})} 
+                      style={{ padding: '0.75rem 1rem', width: '100%' }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Specialization / Branch</label>
+                  <select 
+                    value={profileForm.branch} 
+                    onChange={e => setProfileForm({...profileForm, branch: e.target.value})} 
+                    style={{ padding: '0.75rem 1rem', width: '100%', border: '1px solid var(--border)', borderRadius: '10px' }}
+                  >
+                    {commerceBranches.map(br => (
+                      <option key={br} value={br}>{br}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>LinkedIn Profile URL</label>
+                  <input 
+                    type="url" 
+                    placeholder="https://linkedin.com/in/username" 
+                    value={profileForm.linkedin} 
+                    onChange={e => setProfileForm({...profileForm, linkedin: e.target.value})} 
+                    style={{ padding: '0.75rem 1rem', width: '100%' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>Short Bio</label>
+                  <textarea 
+                    rows="3" 
+                    value={profileForm.bio} 
+                    onChange={e => setProfileForm({...profileForm, bio: e.target.value})} 
+                    style={{ padding: '0.75rem 1rem', resize: 'none', width: '100%' }}
+                  />
+                </div>
+
+                {profileSaved && (
+                  <div style={{ color: '#059669', fontSize: '0.875rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <CheckCircle size={16} /> Profile updated and logged successfully!
+                  </div>
+                )}
+
+                <button type="submit" className="btn btn-primary" style={{ background: 'var(--blue-800)', marginTop: '0.5rem', width: '220px' }}>
+                  Save Profile Changes
+                </button>
+              </form>
+            </div>
+
+            {/* Profile Audit Log & Stats */}
+            <div>
+              {/* Profile Meta Cards */}
+              <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', border: '1px solid #bfdbfe' }}>
+                <h4 style={{ fontWeight: '800', marginBottom: '1rem', color: 'var(--blue-900)' }}>Account Status</h4>
+                <div style={{ display: 'grid', gap: '0.75rem', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--blue-800)', fontWeight: '600' }}>Last Login:</span>
+                    <span style={{ fontWeight: '700' }}>{formatTime(user?.lastLogin)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--blue-800)', fontWeight: '600' }}>Last Updated:</span>
+                    <span style={{ fontWeight: '700' }}>{formatTime(user?.lastProfileUpdate)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* History / Audit Logs */}
+              <div className="card">
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '1.25rem' }}>🔄 Update History</h3>
+                
+                {user?.profileUpdatesHistory && user.profileUpdatesHistory.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '350px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                    {user.profileUpdatesHistory.map((log, idx) => (
+                      <div key={idx} style={{ background: 'var(--gray-50)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.8rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '700', color: 'var(--blue-700)' }}>{log.field}</span>
+                          <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>{formatTime(log.timestamp)}</span>
+                        </div>
+                        <div style={{ color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                          Changed: <span style={{ textDecoration: 'line-through', color: '#991b1b', background: '#fee2e2', padding: '0.05rem 0.25rem', borderRadius: '4px' }}>{log.from}</span>
+                          <span style={{ margin: '0 0.25rem' }}>➔</span>
+                          <span style={{ color: '#166534', background: '#dcfce7', padding: '0.05rem 0.25rem', borderRadius: '4px', fontWeight: '600' }}>{log.to}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-dim)', background: 'var(--gray-50)', borderRadius: '12px', fontSize: '0.85rem' }}>
+                    No updates logged yet. Changes will appear here.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <button className="btn btn-primary" style={{ width: '100%', background: 'var(--blue-800)', padding: '0.8rem' }}>
-            Post to Network <MessageSquare size={16} />
-          </button>
-        </div>
-      </div>
-      <NotificationToast />
+        </motion.div>
+      )}
     </div>
   );
 };

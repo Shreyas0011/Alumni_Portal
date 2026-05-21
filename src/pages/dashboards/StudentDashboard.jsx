@@ -14,6 +14,13 @@ const StudentDashboard = () => {
         subtitle="Here's what's happening in your network today."
       />
 
+      {user?.profileStatus === 'pending' && (
+        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ fontWeight: '700', color: '#92400e' }}>Profile Pending Approval</div>
+          <div style={{ color: '#a16207', fontSize: '0.85rem' }}> — You have limited access until an admin verifies your student status. Mentorship connections are disabled.</div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         <div className="card" style={{ position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, padding: '1rem', opacity: 0.1 }}><BookOpen size={48} /></div>
@@ -61,7 +68,7 @@ const StudentDashboard = () => {
                     {m.tags.map(t => <span key={t} style={{ fontSize: '0.65rem', fontWeight: '700', padding: '0.25rem 0.6rem', background: '#fff', border: '1px solid var(--border)', borderRadius: '6px' }}>{t}</span>)}
                   </div>
                 </div>
-                <button className="btn btn-sm btn-primary">Connect</button>
+                <button className="btn btn-sm btn-primary" disabled={user?.profileStatus === 'pending'} style={{ opacity: user?.profileStatus === 'pending' ? 0.5 : 1 }}>Connect</button>
               </div>
             ))}
           </div>

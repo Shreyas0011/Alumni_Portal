@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { Award, Link2, Mail, MapPin } from 'lucide-react';
 
 const alumni = [
-  { name:'Sarah Jenkins', role:'Senior VP, Tech Global', batch:'2012', location:'San Francisco', img:'https://placehold.co/400x400?text=SJ', achievement:'AI Ethics Pioneer', field:'Technology' },
-  { name:'David Chen', role:'Founder, EcoStream', batch:'2015', location:'Singapore', img:'https://placehold.co/400x400?text=DC', achievement:'Forbes 30 Under 30', field:'Entrepreneurship' },
-  { name:'Elena Rodriguez', role:'Director of Policy, UN', batch:'2010', location:'Geneva', img:'https://placehold.co/400x400?text=ER', achievement:'Global Impact Award', field:'Policy' },
-  { name:'Marcus Thorne', role:'Chief Architect, SpaceNext', batch:'2014', location:'Houston', img:'https://placehold.co/400x400?text=MT', achievement:'Innovator of the Year', field:'Engineering' },
+  { name:'Sarah Jenkins', role:'Senior Investment Banker, Goldman Sachs', batch:'2012', location:'London', img:'https://placehold.co/400x400?text=SJ', achievement:'M&A Dealmaker of the Year', field:'Investment Banking' },
+  { name:'David Chen, CA', role:'Partner, Deloitte Audit & Assurance', batch:'2015', location:'Singapore', img:'https://placehold.co/400x400?text=DC', achievement:'CA Merit Holder (AIR 5)', field:'Auditing & Tax' },
+  { name:'Elena Rodriguez', role:'Chief Financial Officer, Unilever', batch:'2010', location:'New York', img:'https://placehold.co/400x400?text=ER', achievement:'Global CFO Leader Award', field:'Corporate Finance' },
+  { name:'Marcus Thorne', role:'Co-Founder, CapitalEdge Ventures', batch:'2014', location:'Mumbai', img:'https://placehold.co/400x400?text=MT', achievement:'Forbes 30 Under 30 Finance', field:'Venture Capital' },
 ];
 
 const FeaturedAlumni = () => (

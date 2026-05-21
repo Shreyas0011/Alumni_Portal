@@ -8,28 +8,10 @@ const PortalSelection = () => {
   const navigate = useNavigate();
 
   const handlePortalAccess = (role) => {
-    // Auto-login with the selected role
-    login({ name: `Test ${role.charAt(0).toUpperCase() + role.slice(1)}`, role });
-    navigate(`/${role}/dashboard`);
+    navigate(`/login/${role}`);
   };
 
   const portals = [
-    {
-      role: 'student',
-      title: 'Student Portal',
-      description: 'Accelerate your career with alumni mentorship and exclusive resources.',
-      icon: '🎓',
-      color: 'var(--blue-600)',
-      features: ['Mentorship', 'Job Board', 'Skill Paths']
-    },
-    {
-      role: 'teacher',
-      title: 'Faculty Portal',
-      description: 'Bridge the gap between industry and academia with ease.',
-      icon: '👨‍🏫',
-      color: '#059669',
-      features: ['Analytics', 'Placement', 'Outreach']
-    },
     {
       role: 'alumni',
       title: 'Alumni Portal',
@@ -37,6 +19,14 @@ const PortalSelection = () => {
       icon: '🏛️',
       color: 'var(--blue-800)',
       features: ['Networking', 'Giving', 'Events']
+    },
+    {
+      role: 'admin',
+      title: 'Admin Portal',
+      description: 'Oversee and manage the Alumni Connect platform and ecosystem.',
+      icon: '🛡️',
+      color: '#1e293b',
+      features: ['Control Panel', 'User Approvals', 'Analytics']
     }
   ];
 
@@ -75,7 +65,7 @@ const PortalSelection = () => {
         gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
         gap: '2.5rem', 
         width: '100%', 
-        maxWidth: '1200px',
+        maxWidth: '800px', // Adjusted since we only have 2 cards now
         position: 'relative',
         zIndex: 1
       }}>
@@ -132,7 +122,7 @@ const PortalSelection = () => {
                 padding: '1rem',
                 borderRadius: '16px',
                 fontWeight: '700',
-                boxShadow: `0 10px 20px ${portal.role === 'teacher' ? '#05966925' : portal.role === 'student' ? '#2563eb25' : '#1e3a8a25'}`
+                boxShadow: `0 10px 20px ${portal.role === 'admin' ? '#1e293b25' : '#1e3a8a25'}`
               }}>
                 Enter {portal.title}
               </div>
@@ -140,6 +130,76 @@ const PortalSelection = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Simplified Student Login Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        onClick={() => handlePortalAccess('student')}
+        style={{
+          marginTop: '2.5rem',
+          background: '#fff',
+          border: '1px solid rgba(226, 232, 240, 0.8)',
+          borderRadius: '20px',
+          padding: '1.25rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.5rem',
+          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)',
+          maxWidth: '800px',
+          width: '100%',
+          justifyContent: 'space-between',
+          zIndex: 1,
+          cursor: 'pointer',
+          transition: 'transform 0.2s, box-shadow 0.2s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'none';
+          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)';
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            fontSize: '1.75rem',
+            width: '50px',
+            height: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--blue-50)',
+            borderRadius: '12px'
+          }}>
+            🎓
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)' }}>Student Portal</h4>
+            <p style={{ margin: '0.15rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Looking for mentors, jobs, or community? Access the student area here.
+            </p>
+          </div>
+        </div>
+        <button
+          className="btn"
+          style={{
+            background: 'var(--blue-50)',
+            color: 'var(--blue-600)',
+            border: '1px solid var(--blue-100)',
+            padding: '0.625rem 1.25rem',
+            borderRadius: '12px',
+            fontSize: '0.875rem',
+            fontWeight: '700',
+            whiteSpace: 'nowrap',
+            pointerEvents: 'none' // Click handled by parent div
+          }}
+        >
+          Enter Student Portal
+        </button>
+      </motion.div>
 
       <motion.div 
         initial={{ opacity: 0 }}

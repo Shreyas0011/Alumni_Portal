@@ -24,7 +24,7 @@ const Navbar = () => {
 
   const loggedOutLinks = [
     ...baseLinks,
-    { name: 'Portals', path: '/portal', icon: <LayoutGrid size={18} /> },
+    { name: 'Portals', path: '/', icon: <LayoutGrid size={18} /> },
     { name: 'Register', path: '/register', icon: <UserPlus size={18} /> },
   ];
 
@@ -60,19 +60,19 @@ const Navbar = () => {
         <div className="sidebar-brand">
           <Link to="/" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.625rem', textDecoration:'none' }}>
             <motion.img src="/logo.png" alt="Transcend"
-              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-              style={{ height: 58, width: 'auto' }}
+               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
+               style={{ height: 58, width: 'auto' }}
             />
             <div className="sidebar-brand-text">
               <div className="title">
                 {!user ? 'Alumni Connect' : 
-                 user.role === 'student' ? 'Student Portal' : 
-                 user.role === 'teacher' ? 'Faculty Portal' : 'Alumni Portal'}
+                 user.role === 'admin' ? 'Admin Portal' : 
+                 user.role === 'student' ? 'Student Portal' : 'Alumni Portal'}
               </div>
               <div className="sub">
                 {!user ? 'Portal · Transcend' : 
-                 user.role === 'student' ? 'Network · Learn' : 
-                 user.role === 'teacher' ? 'Manage · Mentor' : 'Stay Connected'}
+                 user.role === 'admin' ? 'Manage · Secure' : 
+                 user.role === 'student' ? 'Learn · Connect' : 'Stay Connected'}
               </div>
             </div>
           </Link>
@@ -114,7 +114,7 @@ const Navbar = () => {
         <div className="sidebar-footer">
           {user ? (
             <div className="sidebar-user" style={{ cursor: 'pointer' }} onClick={handleLogout} title="Click to logout">
-              <div className="sidebar-avatar" style={{ background: user.role === 'teacher' ? '#059669' : user.role === 'alumni' ? 'var(--blue-800)' : 'var(--blue-600)' }}>
+              <div className="sidebar-avatar" style={{ background: user.role === 'admin' ? '#1e293b' : 'var(--blue-800)' }}>
                 {user.name.charAt(0)}
               </div>
               <div className="sidebar-user-info" style={{ flex: 1 }}>
@@ -124,7 +124,7 @@ const Navbar = () => {
               <LogOut size={15} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
             </div>
           ) : (
-            <Link to="/portal" className="sidebar-user" style={{ background: 'var(--blue-50)', borderColor: 'var(--blue-100)' }}>
+            <Link to="/" className="sidebar-user" style={{ background: 'var(--blue-50)', borderColor: 'var(--blue-100)' }}>
               <div className="sidebar-avatar" style={{ background: 'var(--blue-600)' }}>?</div>
               <div className="sidebar-user-info" style={{ flex: 1 }}>
                 <div className="name" style={{ color: 'var(--blue-700)' }}>Guest User</div>

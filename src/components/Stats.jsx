@@ -19,10 +19,10 @@ const Counter = ({ value }) => {
 };
 
 const stats = [
-  { label:'Global Alumni', value:'50K+', icon:<Globe size={20}/>, desc:'across 120+ countries' },
-  { label:'Total Members', value:'85K+', icon:<Users size={20}/>, desc:'and growing daily' },
-  { label:'Job Referrals', value:'15K+', icon:<Briefcase size={20}/>, desc:'placed successfully' },
-  { label:'Active Mentors', value:'2K+', icon:<Trophy size={20}/>, desc:'available to connect' },
+  { label:'Global Network', value:'50K+', icon:<Globe size={20}/>, desc:'commerce graduates worldwide' },
+  { label:'CA & CFA Members', value:'12K+', icon:<Users size={20}/>, desc:'qualified professionals' },
+  { label:'Corporate Placements', value:'15K+', icon:<Briefcase size={20}/>, desc:'in top-tier finance firms' },
+  { label:'Corporate Mentors', value:'2K+', icon:<Trophy size={20}/>, desc:'industry leaders to connect' },
 ];
 
 const Stats = () => (

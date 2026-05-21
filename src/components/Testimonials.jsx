@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Quote, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 const testimonials = [
-  { text:"The Alumni Connect Portal genuinely changed my career. The mentor I found here guided me into a VP role I thought was 5 years away.", author:'James Wilson', role:'VP Product, NextGen Ventures', initial:'JW', batch:'2014', rating:5 },
-  { text:"Within two weeks of joining, I had three interviews at alumni-led startups. The community is warm, helpful, and incredibly well-connected.", author:'Samantha Reed', role:'Engineering Manager at Meta', initial:'SR', batch:'2016', rating:5 },
-  { text:"The events and webinars alone are worth it. I learn something new every month from people who are actually doing the work.", author:'Robert Chang', role:'Strategy Consultant', initial:'RC', batch:'2013', rating:5 },
+  { text:"The Commerce Alumni Connect Portal genuinely changed my career. The mentor (a senior partner at EY) I found here guided me through my CA finals and corporate transition.", author:'James Wilson, CA', role:'Tax Partner, EY India', initial:'JW', batch:'2014', rating:5 },
+  { text:"Within two weeks of joining, I received three referrals for Investment Banking Associate roles at JP Morgan. The commerce network is incredibly active and supportive.", author:'Samantha Reed, CFA', role:'IB Associate, JP Morgan', initial:'SR', batch:'2016', rating:5 },
+  { text:"The webinars on equity research, GST reforms, and budget walkthroughs are outstanding. I get regular insights from corporate finance leaders.", author:'Robert Chang', role:'Corporate Finance Lead, Zenith Corp', initial:'RC', batch:'2013', rating:5 },
 ];
 
 const Testimonials = () => {
