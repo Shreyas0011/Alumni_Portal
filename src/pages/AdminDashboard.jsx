@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, FileText, Calendar, Shield, ArrowUpRight, Search, CheckCircle, XCircle, Trophy, MessageSquare, Bell, Send, Cake, Clock, BarChart3, Mail, Phone, Sparkles, Megaphone, Plus, Trash2 } from 'lucide-react';
+import { Users, FileText, Calendar, Shield, ArrowUpRight, Search, CheckCircle, XCircle, Trophy, MessageSquare, Bell, Send, Cake, Clock, BarChart3, Mail, Phone, Sparkles, Megaphone, Plus, Trash2, Paperclip } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [achForm, setAchForm] = useState({ title: '', description: '', category: 'General', date: '' });
   const [bcForm, setBcForm] = useState({ title: '', message: '', priority: 'normal', sendVia: ['email'] });
+  const [bcAttachedFile, setBcAttachedFile] = useState(null);
+  const bcFileInputRef = React.useRef(null);
   const [aiSummary, setAiSummary] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -94,8 +96,15 @@ const AdminDashboard = () => {
   const handleAddBroadcast = (e) => {
     e.preventDefault();
     if (!bcForm.title || !bcForm.message) return;
-    addBroadcast({ ...bcForm, sentVia: bcForm.sendVia });
+    addBroadcast({
+      ...bcForm,
+      sentVia: bcForm.sendVia,
+      attachedFileName: bcAttachedFile ? bcAttachedFile.name : null,
+      attachedFileSize: bcAttachedFile ? bcAttachedFile.size : null,
+    });
     setBcForm({ title: '', message: '', priority: 'normal', sendVia: ['email'] });
+    setBcAttachedFile(null);
+    if (bcFileInputRef.current) bcFileInputRef.current.value = '';
   };
 
   const tabs = [
@@ -477,6 +486,29 @@ const AdminDashboard = () => {
               <form onSubmit={handleAddBroadcast}>
                 <input placeholder="Subject / Title" value={bcForm.title} onChange={e => setBcForm(p => ({ ...p, title: e.target.value }))} required style={{ padding: '0.75rem', marginBottom: '1rem' }} />
                 <textarea placeholder="Write your message to all alumni..." value={bcForm.message} onChange={e => setBcForm(p => ({ ...p, message: e.target.value }))} required rows="4" style={{ padding: '0.75rem', marginBottom: '1rem', resize: 'none' }} />
+
+                {/* File Attachment */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <input
+                    ref={bcFileInputRef}
+                    type="file"
+                    accept="*/*"
+                    style={{ display: 'none' }}
+                    onChange={e => setBcAttachedFile(e.target.files[0] || null)}
+                  />
+                  {bcAttachedFile ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'var(--blue-50)', border: '1px solid var(--blue-200, #bfdbfe)', borderRadius: '8px', padding: '0.6rem 0.9rem', fontSize: '0.83rem' }}>
+                      <Paperclip size={14} style={{ color: 'var(--blue-700)', flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontWeight: '600', color: 'var(--blue-700)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bcAttachedFile.name}</span>
+                      <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem', flexShrink: 0 }}>({(bcAttachedFile.size / 1024).toFixed(1)} KB)</span>
+                      <button type="button" onClick={() => { setBcAttachedFile(null); if (bcFileInputRef.current) bcFileInputRef.current.value = ''; }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontWeight: '700', fontSize: '1rem', lineHeight: 1, padding: '0 0.2rem' }}>×</button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => bcFileInputRef.current?.click()} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.55rem 1rem', border: '1.5px dashed var(--border)', borderRadius: '8px', background: 'transparent', cursor: 'pointer', fontSize: '0.83rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                      <Paperclip size={14} /> Attach a file (any type)
+                    </button>
+                  )}
+                </div>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Send via:</span>
                   {['email', 'whatsapp'].map(ch => (
@@ -502,6 +534,11 @@ const AdminDashboard = () => {
                     <div>
                       <div style={{ fontWeight: '700', marginBottom: '0.25rem' }}>{bc.title}</div>
                       <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{bc.message}</p>
+                      {bc.attachedFileName && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.4rem', background: 'var(--gray-50)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.3rem 0.65rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                          <Paperclip size={12} /> {bc.attachedFileName}{bc.attachedFileSize ? ` (${(bc.attachedFileSize / 1024).toFixed(1)} KB)` : ''}
+                        </div>
+                      )}
                     </div>
                     <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{formatDate(bc.createdAt)}</div>
