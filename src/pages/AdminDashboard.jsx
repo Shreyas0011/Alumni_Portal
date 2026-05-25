@@ -256,45 +256,115 @@ const AdminDashboard = () => {
 
                         {/* Education */}
                         {(p.college || p.batch || p.branch || p.degree) && (
-                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>🎓 Education Details</div>
-                            {p.college && <div style={{ marginBottom: '0.2rem' }}><strong>College:</strong> {p.college}</div>}
-                            {(p.degree || p.branch || p.course) && (
-                              <div style={{ marginBottom: '0.2rem' }}><strong>Degree:</strong> {p.degree || p.branch || p.course}{p.fieldOfStudy ? ` — ${p.fieldOfStudy}` : ''}</div>
+                          <div style={{ background: 'var(--gray-50)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.6rem', color: 'var(--text-main)', fontSize: '0.85rem' }}>🎓 Education Details</div>
+                            {/* College — full width */}
+                            {p.college && (
+                              <div style={{ marginBottom: '0.5rem' }}>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>University / College Name</div>
+                                <div style={{ fontWeight: '600' }}>{p.college}</div>
+                              </div>
                             )}
+                            {/* Degree + Field of Study side by side */}
+                            {(p.degree || p.branch || p.course || p.fieldOfStudy) && (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                <div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Degree</div>
+                                  <div style={{ fontWeight: '600' }}>{p.degree || p.branch || p.course || '—'}</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Field of Study</div>
+                                  <div style={{ fontWeight: '600' }}>{p.fieldOfStudy || '—'}</div>
+                                </div>
+                              </div>
+                            )}
+                            {/* Start Year + Graduation Year side by side */}
                             {(p.eduStartYear || p.eduEndYear || p.batch) && (
-                              <div><strong>Period:</strong> {p.eduStartYear ? `${p.eduStartYear} – ${p.eduEndYear}` : `Class of ${p.batch || p.eduEndYear}`}</div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                <div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Start Year</div>
+                                  <div style={{ fontWeight: '600' }}>{p.eduStartYear || '—'}</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Graduation Year</div>
+                                  <div style={{ fontWeight: '600' }}>{p.eduEndYear || p.batch || '—'}</div>
+                                </div>
+                              </div>
                             )}
                           </div>
                         )}
 
                         {/* Schooling XII */}
                         {p.schoolName && (
-                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>🏫 Schooling (Class XII)</div>
-                            <div style={{ marginBottom: '0.2rem' }}><strong>School:</strong> {p.schoolName}</div>
-                            {p.schoolStream && <div style={{ marginBottom: '0.2rem' }}><strong>Stream:</strong> {p.schoolStream}</div>}
-                            {p.schoolEndYear && <div><strong>Graduation Year:</strong> {p.schoolEndYear}</div>}
+                          <div style={{ background: 'var(--gray-50)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.6rem', color: 'var(--text-main)', fontSize: '0.85rem' }}>🏫 Schooling Details (Class XII)</div>
+                            <div style={{ marginBottom: '0.5rem' }}>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>School Name</div>
+                              <div style={{ fontWeight: '600' }}>{p.schoolName}</div>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                              <div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Stream</div>
+                                <div style={{ fontWeight: '600' }}>{p.schoolStream || '—'}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Graduation Year</div>
+                                <div style={{ fontWeight: '600' }}>{p.schoolEndYear || '—'}</div>
+                              </div>
+                            </div>
                           </div>
                         )}
 
                         {/* Schooling X */}
                         {p.school10Name && (
-                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>🏫 Schooling (Class X)</div>
-                            <div style={{ marginBottom: '0.2rem' }}><strong>School:</strong> {p.school10Name}</div>
-                            {p.school10EndYear && <div><strong>Graduation Year:</strong> {p.school10EndYear}</div>}
+                          <div style={{ background: 'var(--gray-50)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.6rem', color: 'var(--text-main)', fontSize: '0.85rem' }}>🏫 Schooling Details (Class X)</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '0.75rem' }}>
+                              <div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>School Name</div>
+                                <div style={{ fontWeight: '600' }}>{p.school10Name}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Graduation Year</div>
+                                <div style={{ fontWeight: '600' }}>{p.school10EndYear || '—'}</div>
+                              </div>
+                            </div>
                           </div>
                         )}
 
                         {/* Professional */}
                         {(p.profession || p.company || p.linkedin || p.skills) && (
-                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>💼 Professional Experience</div>
-                            {p.profession && <div style={{ marginBottom: '0.2rem' }}><strong>Role:</strong> {p.profession}{p.company ? ` at ${p.company}` : ''}</div>}
-                            {p.skills && <div style={{ marginBottom: '0.2rem' }}>⚡ <strong>Skills:</strong> {p.skills}</div>}
-                            {p.linkedin && (
-                              <div>🔗 <strong>LinkedIn:</strong> <a href={p.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue-600)', textDecoration: 'underline' }}>{p.linkedin}</a></div>
+                          <div style={{ background: 'var(--gray-50)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.6rem', color: 'var(--text-main)', fontSize: '0.85rem' }}>💼 Professional Experience</div>
+                            {/* Role + Company side by side */}
+                            {(p.profession || p.company) && (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                <div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Current Job Role</div>
+                                  <div style={{ fontWeight: '600' }}>{p.profession || '—'}</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Organisation / Company</div>
+                                  <div style={{ fontWeight: '600' }}>{p.company || '—'}</div>
+                                </div>
+                              </div>
+                            )}
+                            {/* LinkedIn + Skills side by side */}
+                            {(p.linkedin || p.skills) && (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                {p.linkedin && (
+                                  <div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>LinkedIn</div>
+                                    <a href={p.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue-600)', textDecoration: 'underline', fontWeight: '600', wordBreak: 'break-all' }}>{p.linkedin}</a>
+                                  </div>
+                                )}
+                                {p.skills && (
+                                  <div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.1rem' }}>Skills</div>
+                                    <div style={{ fontWeight: '600' }}>{p.skills}</div>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
