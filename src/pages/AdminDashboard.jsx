@@ -237,7 +237,7 @@ const AdminDashboard = () => {
             ) : (
               <div style={{ display: 'grid', gap: '1rem' }}>
                 {pendingProfilesList.map(p => (
-                  <div key={p.id} className="card" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.5rem', alignItems: 'center' }}>
+                  <div key={p.id} className="card" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.5rem', alignItems: 'start' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
                         <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--blue-100)', color: 'var(--blue-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.1rem' }}>{p.name[0]}</div>
@@ -246,36 +246,62 @@ const AdminDashboard = () => {
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Submitted: {formatTime(p.submittedAt)}</div>
                         </div>
                       </div>
-                      <div style={{ display: 'grid', gap: '0.75rem', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'grid', gap: '0.65rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+
+                        {/* Contact */}
                         <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-                          <span>🆔 <strong>Roll No:</strong> {p.rollNumber || 'N/A'}</span>
                           <span>📞 <strong>Phone:</strong> {p.phone || 'N/A'}</span>
-                          <span>✉️ <strong>Email:</strong> {p.email}</span>
+                          <span>✉️ <strong>Email:</strong> {p.email || 'N/A'}</span>
                         </div>
-                        {p.college ? (
+
+                        {/* Education */}
+                        {(p.college || p.batch || p.branch || p.degree) && (
                           <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                            <div style={{ marginBottom: '0.25rem' }}>🎓 <strong>Education:</strong> {p.degree} in {p.fieldOfStudy} at {p.college} ({p.eduStartYear} - {p.eduEndYear})</div>
-                            {p.schoolName && (
-                              <div style={{ marginBottom: '0.25rem' }}>🏫 <strong>Schooling (Class XII):</strong> {p.schoolName} ({p.schoolStream}, Class of {p.schoolEndYear})</div>
+                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>🎓 Education Details</div>
+                            {p.college && <div style={{ marginBottom: '0.2rem' }}><strong>College:</strong> {p.college}</div>}
+                            {(p.degree || p.branch || p.course) && (
+                              <div style={{ marginBottom: '0.2rem' }}><strong>Degree:</strong> {p.degree || p.branch || p.course}{p.fieldOfStudy ? ` — ${p.fieldOfStudy}` : ''}</div>
                             )}
-                            {p.school10Name && (
-                              <div style={{ marginBottom: '0.25rem' }}>🏫 <strong>Schooling (Class X):</strong> {p.school10Name} (Class of {p.school10EndYear})</div>
+                            {(p.eduStartYear || p.eduEndYear || p.batch) && (
+                              <div><strong>Period:</strong> {p.eduStartYear ? `${p.eduStartYear} – ${p.eduEndYear}` : `Class of ${p.batch || p.eduEndYear}`}</div>
                             )}
-                            <div style={{ marginBottom: '0.25rem' }}>💼 <strong>Professional:</strong> {p.profession} at {p.company}</div>
-                            {p.skills && <div style={{ marginBottom: '0.25rem' }}>⚡ <strong>Skills:</strong> {p.skills}</div>}
+                          </div>
+                        )}
+
+                        {/* Schooling XII */}
+                        {p.schoolName && (
+                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>🏫 Schooling (Class XII)</div>
+                            <div style={{ marginBottom: '0.2rem' }}><strong>School:</strong> {p.schoolName}</div>
+                            {p.schoolStream && <div style={{ marginBottom: '0.2rem' }}><strong>Stream:</strong> {p.schoolStream}</div>}
+                            {p.schoolEndYear && <div><strong>Graduation Year:</strong> {p.schoolEndYear}</div>}
+                          </div>
+                        )}
+
+                        {/* Schooling X */}
+                        {p.school10Name && (
+                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>🏫 Schooling (Class X)</div>
+                            <div style={{ marginBottom: '0.2rem' }}><strong>School:</strong> {p.school10Name}</div>
+                            {p.school10EndYear && <div><strong>Graduation Year:</strong> {p.school10EndYear}</div>}
+                          </div>
+                        )}
+
+                        {/* Professional */}
+                        {(p.profession || p.company || p.linkedin || p.skills) && (
+                          <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-main)' }}>💼 Professional Experience</div>
+                            {p.profession && <div style={{ marginBottom: '0.2rem' }}><strong>Role:</strong> {p.profession}{p.company ? ` at ${p.company}` : ''}</div>}
+                            {p.skills && <div style={{ marginBottom: '0.2rem' }}>⚡ <strong>Skills:</strong> {p.skills}</div>}
                             {p.linkedin && (
                               <div>🔗 <strong>LinkedIn:</strong> <a href={p.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue-600)', textDecoration: 'underline' }}>{p.linkedin}</a></div>
                             )}
                           </div>
-                        ) : (
-                          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-                            <span>🎓 <strong>Pass out Batch:</strong> {p.batch || '—'}</span>
-                            <span>📚 <strong>Specialization:</strong> {p.branch || p.course || 'Commerce'}</span>
-                            {p.profession && <span>💼 <strong>Role:</strong> {p.profession} at {p.company || '—'}</span>}
-                          </div>
                         )}
+
+                        {/* Bio */}
+                        {p.bio && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>"{p.bio}"</p>}
                       </div>
-                      {p.bio && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontStyle: 'italic' }}>"{p.bio}"</p>}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <button className="btn btn-sm" style={{ background: '#059669', color: '#fff' }} onClick={() => approveProfile(p.id)}><CheckCircle size={14} /> Approve</button>
