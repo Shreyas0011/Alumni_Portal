@@ -255,6 +255,12 @@ const AdminDashboard = () => {
                         {p.college ? (
                           <div style={{ background: 'var(--gray-50)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
                             <div style={{ marginBottom: '0.25rem' }}>🎓 <strong>Education:</strong> {p.degree} in {p.fieldOfStudy} at {p.college} ({p.eduStartYear} - {p.eduEndYear})</div>
+                            {p.schoolName && (
+                              <div style={{ marginBottom: '0.25rem' }}>🏫 <strong>Schooling (Class XII):</strong> {p.schoolName} ({p.schoolStream}, Class of {p.schoolEndYear})</div>
+                            )}
+                            {p.school10Name && (
+                              <div style={{ marginBottom: '0.25rem' }}>🏫 <strong>Schooling (Class X):</strong> {p.school10Name} (Class of {p.school10EndYear})</div>
+                            )}
                             <div style={{ marginBottom: '0.25rem' }}>💼 <strong>Professional:</strong> {p.profession} at {p.company}</div>
                             {p.skills && <div style={{ marginBottom: '0.25rem' }}>⚡ <strong>Skills:</strong> {p.skills}</div>}
                             {p.linkedin && (

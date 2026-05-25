@@ -8,9 +8,17 @@ const Registration = () => {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: '',
-    rollNumber: '',
     batch: '',
     branch: 'B.Com Accounts & Finance',
+    college: 'Transcend College of Commerce',
+    fieldOfStudy: '',
+    eduStartYear: '',
+    eduEndYear: '',
+    schoolName: '',
+    schoolStream: 'Commerce',
+    schoolEndYear: '',
+    school10Name: '',
+    school10EndYear: '',
     phone: '',
     email: '',
     password: '',
@@ -22,13 +30,22 @@ const Registration = () => {
     
     submitProfile({
       name: form.name,
-      rollNumber: form.rollNumber,
-      batch: form.batch,
+      batch: form.eduEndYear || form.batch,
       course: form.branch,
       branch: form.branch,
+      college: form.college,
+      degree: form.branch,
+      fieldOfStudy: form.fieldOfStudy,
+      eduStartYear: form.eduStartYear,
+      eduEndYear: form.eduEndYear,
+      schoolName: form.schoolName,
+      schoolStream: form.schoolStream,
+      schoolEndYear: form.schoolEndYear,
+      school10Name: form.school10Name,
+      school10EndYear: form.school10EndYear,
       phone: form.phone,
       email: form.email,
-      bio: form.bio || `Commerce Alumnus specializing in ${form.branch}. Roll Number: ${form.rollNumber}`,
+      bio: form.bio || `${form.branch} Alumnus from ${form.college} specializing in ${form.fieldOfStudy}.`,
       status: 'pending'
     });
 
@@ -54,7 +71,7 @@ const Registration = () => {
           className="card"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          style={{ padding: '4rem 3rem', borderRadius: '24px', textAlign: 'center', maxWidth: '550px', background: '#fff' }}
+          style={{ padding: '4rem 3rem', borderRadius: '24px', textAlign: 'center', maxWidth: '600px', background: '#fff' }}
         >
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
@@ -81,9 +98,16 @@ const Registration = () => {
             <h4 style={{ fontWeight: '700', marginBottom: '0.75rem', color: 'var(--text-main)' }}>Registration Summary:</h4>
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               <div><strong>Name:</strong> {form.name}</div>
-              <div><strong>Roll Number:</strong> {form.rollNumber}</div>
-              <div><strong>Pass out Batch:</strong> Class of {form.batch}</div>
-              <div><strong>Specialization:</strong> {form.branch}</div>
+              <div><strong>School / College:</strong> {form.college}</div>
+              <div><strong>Degree & Specialization:</strong> {form.branch}</div>
+              <div><strong>Field of Study:</strong> {form.fieldOfStudy}</div>
+              <div><strong>Education Period:</strong> {form.eduStartYear} - {form.eduEndYear} (Class of {form.eduEndYear})</div>
+              {form.schoolName && (
+                <div><strong>Schooling (Class XII):</strong> {form.schoolName} ({form.schoolStream}, Class of {form.schoolEndYear})</div>
+              )}
+              {form.school10Name && (
+                <div><strong>Schooling (Class X):</strong> {form.school10Name} (Class of {form.school10EndYear})</div>
+              )}
               <div><strong>Phone Number:</strong> {form.phone}</div>
               <div><strong>Email:</strong> {form.email}</div>
             </div>
@@ -136,125 +160,265 @@ const Registration = () => {
             className="card"
             style={{ padding: '3.5rem', borderRadius: '24px', background: '#fff' }}
           >
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+              {/* Section 1: Personal Information */}
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <User size={14} style={{ color: 'var(--blue-700)' }} /> Full Name
-                </label>
-                <input 
-                  type="text" 
-                  placeholder="Sarah Jenkins" 
-                  required 
-                  value={form.name}
-                  onChange={(e) => setForm({...form, name: e.target.value})}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--blue-900)', borderBottom: '2px solid var(--blue-50)', paddingBottom: '0.5rem' }}>
+                  Personal Information
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                      <User size={14} style={{ color: 'var(--blue-700)' }} /> Full Name
+                    </label>
+                    <input 
+                      type="text" 
+                      placeholder="Sarah Jenkins" 
+                      required 
+                      value={form.name}
+                      onChange={(e) => setForm({...form, name: e.target.value})}
+                      style={{ padding: '0.875rem 1rem' }}
+                    />
+                  </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                    <Hash size={14} style={{ color: 'var(--blue-700)' }} /> Roll Number
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="COM202011" 
-                    required 
-                    value={form.rollNumber}
-                    onChange={(e) => setForm({...form, rollNumber: e.target.value})}
-                    style={{ padding: '0.875rem 1rem' }}
-                  />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Phone size={14} style={{ color: 'var(--blue-700)' }} /> Phone Number
+                      </label>
+                      <input 
+                        type="tel" 
+                        placeholder="9876543210" 
+                        required 
+                        pattern="[0-9]{10}"
+                        maxLength="10"
+                        value={form.phone}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setForm({...form, phone: val});
+                        }}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Mail size={14} style={{ color: 'var(--blue-700)' }} /> Email Address
+                      </label>
+                      <input 
+                        type="email" 
+                        placeholder="sarah@example.com" 
+                        required 
+                        value={form.email}
+                        onChange={(e) => setForm({...form, email: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                    <Calendar size={14} style={{ color: 'var(--blue-700)' }} /> Pass out Batch
-                  </label>
-                  <input 
-                    type="number" 
-                    placeholder="2024" 
-                    required 
-                    min="1950" 
-                    max="2030"
-                    value={form.batch}
-                    onChange={(e) => setForm({...form, batch: e.target.value})}
-                    style={{ padding: '0.875rem 1rem' }}
-                  />
+              </div>
+
+              {/* Section 2: School & Education Details */}
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--blue-900)', borderBottom: '2px solid var(--blue-50)', paddingBottom: '0.5rem' }}>
+                  Education & School Details
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                      <GraduationCap size={14} style={{ color: 'var(--blue-700)' }} /> School / College Name
+                    </label>
+                    <input 
+                      type="text" 
+                      placeholder="Transcend College of Commerce" 
+                      required 
+                      value={form.college}
+                      onChange={(e) => setForm({...form, college: e.target.value})}
+                      style={{ padding: '0.875rem 1rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <BookOpen size={14} style={{ color: 'var(--blue-700)' }} /> Degree / Program
+                      </label>
+                      <select 
+                        value={form.branch}
+                        onChange={(e) => setForm({...form, branch: e.target.value})}
+                        style={{ padding: '0.875rem 1rem', width: '100%' }}
+                      >
+                        {commerceBranches.map((br) => (
+                          <option key={br} value={br}>{br}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Briefcase size={14} style={{ color: 'var(--blue-700)' }} /> Field of Study
+                      </label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Financial Analysis" 
+                        required 
+                        value={form.fieldOfStudy}
+                        onChange={(e) => setForm({...form, fieldOfStudy: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Calendar size={14} style={{ color: 'var(--blue-700)' }} /> Start Year
+                      </label>
+                      <input 
+                        type="number" 
+                        placeholder="2020" 
+                        required 
+                        min="1950" 
+                        max="2030"
+                        value={form.eduStartYear}
+                        onChange={(e) => setForm({...form, eduStartYear: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Calendar size={14} style={{ color: 'var(--blue-700)' }} /> End Year
+                      </label>
+                      <input 
+                        type="number" 
+                        placeholder="2024" 
+                        required 
+                        min="1950" 
+                        max="2030"
+                        value={form.eduEndYear}
+                        onChange={(e) => setForm({...form, eduEndYear: e.target.value, batch: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Schooling Details */}
+                  <div style={{ height: '1px', background: 'var(--blue-50)', margin: '0.75rem 0' }} />
+                  
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                      <GraduationCap size={14} style={{ color: 'var(--blue-700)' }} /> School Name (Class XII)
+                    </label>
+                    <input 
+                      type="text" 
+                      placeholder="E.g. St. Mary's Higher Secondary School" 
+                      required 
+                      value={form.schoolName}
+                      onChange={(e) => setForm({...form, schoolName: e.target.value})}
+                      style={{ padding: '0.875rem 1rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <BookOpen size={14} style={{ color: 'var(--blue-700)' }} /> School Stream
+                      </label>
+                      <select 
+                        value={form.schoolStream}
+                        onChange={(e) => setForm({...form, schoolStream: e.target.value})}
+                        style={{ padding: '0.875rem 1rem', width: '100%' }}
+                      >
+                        <option value="Commerce">Commerce</option>
+                        <option value="Science">Science</option>
+                        <option value="Arts">Arts</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Calendar size={14} style={{ color: 'var(--blue-700)' }} /> School Graduation Year
+                      </label>
+                      <input 
+                        type="number" 
+                        placeholder="2017" 
+                        required 
+                        min="1950" 
+                        max="2035"
+                        value={form.schoolEndYear}
+                        onChange={(e) => setForm({...form, schoolEndYear: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Schooling Details (Class X) */}
+                  <div style={{ height: '1px', background: 'var(--blue-50)', margin: '0.75rem 0' }} />
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <GraduationCap size={14} style={{ color: 'var(--blue-700)' }} /> School Name (Class X)
+                      </label>
+                      <input 
+                        type="text" 
+                        placeholder="E.g. St. Mary's High School" 
+                        required 
+                        value={form.school10Name}
+                        onChange={(e) => setForm({...form, school10Name: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                        <Calendar size={14} style={{ color: 'var(--blue-700)' }} /> School Graduation Year
+                      </label>
+                      <input 
+                        type="number" 
+                        placeholder="2015" 
+                        required 
+                        min="1950" 
+                        max="2035"
+                        value={form.school10EndYear}
+                        onChange={(e) => setForm({...form, school10EndYear: e.target.value})}
+                        style={{ padding: '0.875rem 1rem' }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Section 3: Account Security & Bio */}
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <BookOpen size={14} style={{ color: 'var(--blue-700)' }} /> Specialization / Branch Details
-                </label>
-                <select 
-                  value={form.branch}
-                  onChange={(e) => setForm({...form, branch: e.target.value})}
-                  style={{ padding: '0.875rem 1rem', width: '100%' }}
-                >
-                  {commerceBranches.map((br) => (
-                    <option key={br} value={br}>{br}</option>
-                  ))}
-                </select>
-              </div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--blue-900)', borderBottom: '2px solid var(--blue-50)', paddingBottom: '0.5rem' }}>
+                  Account Security & Bio
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                      <Lock size={14} style={{ color: 'var(--blue-700)' }} /> Set Password
+                    </label>
+                    <input 
+                      type="password" 
+                      placeholder="••••••••" 
+                      required 
+                      value={form.password}
+                      onChange={(e) => setForm({...form, password: e.target.value})}
+                      style={{ padding: '0.875rem 1rem' }}
+                    />
+                  </div>
 
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Phone size={14} style={{ color: 'var(--blue-700)' }} /> Phone Number
-                </label>
-                <input 
-                  type="tel" 
-                  placeholder="9876543210" 
-                  required 
-                  pattern="[0-9]{10}"
-                  maxLength="10"
-                  value={form.phone}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    setForm({...form, phone: val});
-                  }}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Mail size={14} style={{ color: 'var(--blue-700)' }} /> Email Address
-                </label>
-                <input 
-                  type="email" 
-                  placeholder="sarah@example.com" 
-                  required 
-                  value={form.email}
-                  onChange={(e) => setForm({...form, email: e.target.value})}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Lock size={14} style={{ color: 'var(--blue-700)' }} /> Set Password
-                </label>
-                <input 
-                  type="password" 
-                  placeholder="••••••••" 
-                  required 
-                  value={form.password}
-                  onChange={(e) => setForm({...form, password: e.target.value})}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Briefcase size={14} style={{ color: 'var(--blue-700)' }} /> Professional Bio / Journey (Optional)
-                </label>
-                <textarea 
-                  rows="3" 
-                  placeholder="E.g. CA Finals candidate / Investment analyst at Blackstone..." 
-                  value={form.bio}
-                  onChange={(e) => setForm({...form, bio: e.target.value})}
-                  style={{ padding: '0.875rem 1rem', resize: 'none' }}
-                />
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                      <Briefcase size={14} style={{ color: 'var(--blue-700)' }} /> Professional Bio / Journey (Optional)
+                    </label>
+                    <textarea 
+                      rows="3" 
+                      placeholder="E.g. CA Finals candidate / Investment analyst at Blackstone..." 
+                      value={form.bio}
+                      onChange={(e) => setForm({...form, bio: e.target.value})}
+                      style={{ padding: '0.875rem 1rem', resize: 'none' }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem', width: '100%', padding: '1rem' }}>

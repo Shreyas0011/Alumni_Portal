@@ -14,7 +14,6 @@ const Login = ({ role }) => {
   // Registration Form State
   const [regForm, setRegForm] = useState({
     name: '',
-    rollNumber: '',
     phone: '',
     email: '',
     password: '',
@@ -23,6 +22,11 @@ const Login = ({ role }) => {
     fieldOfStudy: '',
     eduStartYear: '',
     eduEndYear: '',
+    schoolName: '',
+    schoolStream: 'Commerce',
+    schoolEndYear: '',
+    school10Name: '',
+    school10EndYear: '',
     profession: '',
     company: '',
     linkedin: '',
@@ -161,7 +165,6 @@ const Login = ({ role }) => {
     // Submit registration request to Admin
     submitProfile({
       name: regForm.name,
-      rollNumber: regForm.rollNumber,
       phone: regForm.phone,
       email: regForm.email,
       password: regForm.password, // Keep password for login
@@ -170,6 +173,11 @@ const Login = ({ role }) => {
       fieldOfStudy: regForm.fieldOfStudy,
       eduStartYear: regForm.eduStartYear,
       eduEndYear: regForm.eduEndYear,
+      schoolName: regForm.schoolName,
+      schoolStream: regForm.schoolStream,
+      schoolEndYear: regForm.schoolEndYear,
+      school10Name: regForm.school10Name,
+      school10EndYear: regForm.school10EndYear,
       profession: regForm.profession,
       company: regForm.company,
       linkedin: regForm.linkedin,
@@ -236,9 +244,14 @@ const Login = ({ role }) => {
             <h4 style={{ fontWeight: '700', marginBottom: '0.75rem', color: 'var(--text-main)' }}>Registration Summary:</h4>
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               <div><strong>Name:</strong> {regForm.name}</div>
-              <div><strong>Roll Number:</strong> {regForm.rollNumber}</div>
               <div><strong>College:</strong> {regForm.college}</div>
               <div><strong>Education:</strong> {regForm.degree} in {regForm.fieldOfStudy} ({regForm.eduStartYear} - {regForm.eduEndYear})</div>
+              {regForm.schoolName && (
+                <div><strong>Schooling (Class XII):</strong> {regForm.schoolName} ({regForm.schoolStream}, Class of {regForm.schoolEndYear})</div>
+              )}
+              {regForm.school10Name && (
+                <div><strong>Schooling (Class X):</strong> {regForm.school10Name} (Class of {regForm.school10EndYear})</div>
+              )}
               <div><strong>Professional:</strong> {regForm.profession} at {regForm.company}</div>
               <div><strong>Phone Number:</strong> {regForm.phone}</div>
               <div><strong>Email:</strong> {regForm.email}</div>
@@ -256,7 +269,6 @@ const Login = ({ role }) => {
               setTab('signin');
               setRegForm({
                 name: '',
-                rollNumber: '',
                 phone: '',
                 email: '',
                 password: '',
@@ -265,6 +277,11 @@ const Login = ({ role }) => {
                 fieldOfStudy: '',
                 eduStartYear: '',
                 eduEndYear: '',
+                schoolName: '',
+                schoolStream: 'Commerce',
+                schoolEndYear: '',
+                school10Name: '',
+                school10EndYear: '',
                 profession: '',
                 company: '',
                 linkedin: '',
@@ -399,33 +416,18 @@ const Login = ({ role }) => {
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <User size={14} style={{ color: config.color }} /> Full Name
-                </label>
-                <input 
-                  type="text" 
-                  placeholder="Sarah Jenkins" 
-                  required 
-                  value={regForm.name}
-                  onChange={(e) => setRegForm({...regForm, name: e.target.value})}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Hash size={14} style={{ color: config.color }} /> Roll Number
-                </label>
-                <input 
-                  type="text" 
-                  placeholder="COM202011" 
-                  required 
-                  value={regForm.rollNumber}
-                  onChange={(e) => setRegForm({...regForm, rollNumber: e.target.value})}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                <User size={14} style={{ color: config.color }} /> Full Name
+              </label>
+              <input 
+                type="text" 
+                placeholder="Sarah Jenkins" 
+                required 
+                value={regForm.name}
+                onChange={(e) => setRegForm({...regForm, name: e.target.value})}
+                style={{ padding: '0.875rem 1rem' }}
+              />
             </div>
 
             {/* Education Details */}
@@ -506,6 +508,98 @@ const Login = ({ role }) => {
                     max="2035"
                     value={regForm.eduEndYear}
                     onChange={(e) => setRegForm({...regForm, eduEndYear: e.target.value})}
+                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Schooling Details */}
+              <div style={{ height: '1px', background: 'var(--border)', margin: '0.75rem 0' }} />
+              
+              <h5 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                🏫 Schooling Details (Class XII)
+              </h5>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
+                  School Name
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="E.g. St. Mary's Higher Secondary School" 
+                  required 
+                  value={regForm.schoolName}
+                  onChange={(e) => setRegForm({...regForm, schoolName: e.target.value})}
+                  style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
+                    Stream
+                  </label>
+                  <select 
+                    value={regForm.schoolStream}
+                    onChange={(e) => setRegForm({...regForm, schoolStream: e.target.value})}
+                    style={{ padding: '0.75rem 1rem', width: '100%', fontSize: '0.85rem' }}
+                  >
+                    <option value="Commerce">Commerce</option>
+                    <option value="Science">Science</option>
+                    <option value="Arts">Arts</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
+                    Graduation Year
+                  </label>
+                  <input 
+                    type="number" 
+                    placeholder="2017" 
+                    required 
+                    min="1950" 
+                    max="2035"
+                    value={regForm.schoolEndYear}
+                    onChange={(e) => setRegForm({...regForm, schoolEndYear: e.target.value})}
+                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Schooling Details (Class X) */}
+              <div style={{ height: '1px', background: 'var(--border)', margin: '0.75rem 0' }} />
+              
+              <h5 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                🏫 Schooling Details (Class X)
+              </h5>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
+                    School Name
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="E.g. St. Mary's High School" 
+                    required 
+                    value={regForm.school10Name}
+                    onChange={(e) => setRegForm({...regForm, school10Name: e.target.value})}
+                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
+                    Graduation Year (Class X)
+                  </label>
+                  <input 
+                    type="number" 
+                    placeholder="2015" 
+                    required 
+                    min="1950" 
+                    max="2035"
+                    value={regForm.school10EndYear}
+                    onChange={(e) => setRegForm({...regForm, school10EndYear: e.target.value})}
                     style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
                   />
                 </div>
