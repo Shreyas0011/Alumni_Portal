@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { Award, Link2, Mail, MapPin } from 'lucide-react';
 
 const alumni = [
-  { name:'Sarah Jenkins', role:'Senior Investment Banker, Goldman Sachs', batch:'2012', location:'London', img:'https://placehold.co/400x400?text=SJ', achievement:'M&A Dealmaker of the Year', field:'Investment Banking' },
-  { name:'David Chen, CA', role:'Partner, Deloitte Audit & Assurance', batch:'2015', location:'Singapore', img:'https://placehold.co/400x400?text=DC', achievement:'CA Merit Holder (AIR 5)', field:'Auditing & Tax' },
-  { name:'Elena Rodriguez', role:'Chief Financial Officer, Unilever', batch:'2010', location:'New York', img:'https://placehold.co/400x400?text=ER', achievement:'Global CFO Leader Award', field:'Corporate Finance' },
-  { name:'Marcus Thorne', role:'Co-Founder, CapitalEdge Ventures', batch:'2014', location:'Mumbai', img:'https://placehold.co/400x400?text=MT', achievement:'Forbes 30 Under 30 Finance', field:'Venture Capital' },
+  { name:'Sarah Jenkins', role:'Senior Investment Banker, Goldman Sachs', batch:'2012', location:'London', achievement:'M&A Dealmaker of the Year', field:'Investment Banking' },
+  { name:'David Chen, CA', role:'Partner, Deloitte Audit & Assurance', batch:'2015', location:'Singapore', achievement:'CA Merit Holder (AIR 5)', field:'Auditing & Tax' },
+  { name:'Elena Rodriguez', role:'Chief Financial Officer, Unilever', batch:'2010', location:'New York', achievement:'Global CFO Leader Award', field:'Corporate Finance' },
+  { name:'Marcus Thorne', role:'Co-Founder, CapitalEdge Ventures', batch:'2014', location:'Mumbai', achievement:'Forbes 30 Under 30 Finance', field:'Venture Capital' },
 ];
 
 const FeaturedAlumni = () => (
@@ -25,31 +25,30 @@ const FeaturedAlumni = () => (
         {alumni.map((p, i) => (
           <motion.div key={i} className="alumni-card premium"
             initial={{ opacity:0, y:24 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.09 }}>
-            {/* Image */}
-            <div style={{ position:'relative', aspectRatio:'1.15', overflow:'hidden' }}>
-              <img src={p.img} alt={p.name} style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.5s var(--ease)', display:'block' }}
-                onMouseEnter={e=>e.currentTarget.style.transform='scale(1.07)'}
-                onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
-              />
-              {/* Overlay badge */}
-              <div style={{ position:'absolute', bottom:'0.75rem', left:'0.75rem', right:'0.75rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <div style={{ background:'rgba(255,255,255,0.95)', border:'1px solid var(--blue-100)', borderRadius:'999px', padding:'0.25rem 0.7rem', display:'flex', alignItems:'center', gap:'0.35rem', color:'var(--blue-700)', fontSize:'0.7rem', fontWeight:700, backdropFilter:'blur(8px)' }}>
-                  <Award size={11}/> {p.achievement}
-                </div>
-                <div style={{ background:'rgba(37,99,235,0.9)', borderRadius:'999px', padding:'0.25rem 0.6rem', color:'#fff', fontSize:'0.68rem', fontWeight:700 }}>
-                  {p.field}
-                </div>
+            {/* Header: initials avatar (no photos on file yet) */}
+            <div style={{ position:'relative', height:150, display:'flex', alignItems:'center', justifyContent:'center',
+              background:'radial-gradient(70% 80% at 85% 0%, rgba(96,165,250,0.45), transparent 60%), linear-gradient(135deg, var(--blue-900) 0%, var(--blue-700) 100%)' }}>
+              <div aria-hidden="true" style={{ width:84, height:84, borderRadius:'50%', display:'grid', placeItems:'center',
+                background:'rgba(255,255,255,0.14)', border:'2px solid rgba(255,255,255,0.45)', color:'#fff',
+                fontSize:'1.75rem', fontWeight:800, letterSpacing:'-0.02em', boxShadow:'0 10px 24px rgba(15,23,42,0.25)' }}>
+                {p.name.split(' ').filter(w => /^[A-Z]/.test(w)).slice(0, 2).map(w => w[0]).join('')}
               </div>
+              <span style={{ position:'absolute', top:'0.75rem', right:'0.75rem', background:'rgba(255,255,255,0.16)', border:'1px solid rgba(255,255,255,0.3)', borderRadius:'999px', padding:'0.2rem 0.65rem', color:'#fff', fontSize:'0.68rem', fontWeight:700, whiteSpace:'nowrap' }}>
+                {p.field}
+              </span>
             </div>
 
             {/* Info */}
-            <div style={{ padding:'1.25rem' }}>
+            <div style={{ padding:'0 1.25rem 1.25rem', display:'flex', flexDirection:'column', flex:1 }}>
               <div style={{ display:'flex', alignItems:'center', gap:'0.4rem', color:'var(--text-dim)', fontSize:'0.72rem', marginBottom:'0.3rem' }}>
                 <MapPin size={11}/> {p.location} · Class of {p.batch}
               </div>
               <h3 style={{ fontSize:'1rem', fontWeight:700, color:'var(--text-main)', marginBottom:'0.2rem' }}>{p.name}</h3>
-              <p style={{ fontSize:'0.82rem', color:'var(--text-muted)', marginBottom:'1rem' }}>{p.role}</p>
-              <div style={{ display:'flex', gap:'0.5rem' }}>
+              <p style={{ fontSize:'0.82rem', color:'var(--text-muted)', marginBottom:'0.75rem' }}>{p.role}</p>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:'0.4rem', color:'var(--blue-700)', fontSize:'0.75rem', fontWeight:700, marginBottom:'1rem', lineHeight:1.4 }}>
+                <Award size={13} style={{ flexShrink:0, marginTop:1 }}/> {p.achievement}
+              </div>
+              <div style={{ display:'flex', gap:'0.5rem', marginTop:'auto' }}>
                 {[Link2, Mail].map((Icon, j) => (
                   <a key={j} href="#" style={{ width:32, height:32, borderRadius:'var(--radius-sm)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-dim)', transition:'var(--transition)' }}
                     onMouseEnter={e=>{e.currentTarget.style.color='var(--blue-700)';e.currentTarget.style.borderColor='var(--blue-200)';e.currentTarget.style.background='var(--blue-50)';}}

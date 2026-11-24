@@ -118,15 +118,15 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div style={{ background: 'var(--gray-50)', minHeight: '100vh', padding: '2.5rem 3rem' }}>
+    <div className="admin-page" style={{ background: 'var(--gray-50)', minHeight: '100vh', padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem)' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-          <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.25rem' }}>Admin <span style={{ background: 'linear-gradient(135deg, var(--blue-700), var(--blue-500))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Command Center</span></h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem 1.5rem', marginBottom: '2.5rem' }}>
+          <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 800, marginBottom: '0.25rem' }}>Admin <span style={{ background: 'linear-gradient(135deg, var(--blue-700), var(--blue-500))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Command Center</span></h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Manage alumni, moderate content, and broadcast updates.</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             <button className="btn btn-primary" onClick={generateAiSummary} style={{ padding: '0.65rem 1.25rem' }}><Sparkles size={16} /> AI Summary</button>
             <button className="btn btn-outline" onClick={handleLogout} style={{ padding: '0.65rem 1.25rem', color: '#ef4444', borderColor: '#ef4444' }}>Sign Out</button>
           </div>
@@ -144,7 +144,7 @@ const AdminDashboard = () => {
         {/* OVERVIEW */}
         {activeTab === 'overview' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
               {[
                 { label: 'Total Alumni', value: alumniList.length, icon: <Users size={20} />, change: '+3 this week' },
                 { label: 'Pending Profiles', value: pendingProfilesList.length, icon: <FileText size={20} />, change: 'Need review' },
@@ -216,7 +216,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Summary Stats Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '1rem', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
                 <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Net Growth YTD</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--blue-700)', marginTop: '0.25rem' }}>+700 Users</div>

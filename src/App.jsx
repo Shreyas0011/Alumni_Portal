@@ -10,6 +10,7 @@ import Events from './pages/Events';
 import AdminDashboard from './pages/AdminDashboard';
 import PortalSelection from './pages/PortalSelection';
 import Login from './pages/Login';
+import RequestAccess from './pages/RequestAccess';
 import ProfileCompletion from './pages/ProfileCompletion';
 import StudentDashboard from './pages/dashboards/StudentDashboard';
 import AlumniDashboard from './pages/dashboards/AlumniDashboard';
@@ -48,9 +49,10 @@ function App() {
         <Route path="/events" element={<Layout><Events /></Layout>} />
         
         {/* Portal Routes */}
-        <Route path="/login/student" element={<Login role="student" />} />
-        <Route path="/login/alumni" element={<Login role="alumni" />} />
-        <Route path="/login/admin" element={<Login role="admin" />} />
+        {/* Overall360 unified gateway — role comes from the account in MongoDB */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/login/:role" element={<Login />} />
+        <Route path="/request-access" element={<RequestAccess />} />
 
         {/* Profile Completion */}
         <Route path="/profile/complete" element={<Layout><ProfileCompletion /></Layout>} />

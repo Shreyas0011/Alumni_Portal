@@ -46,7 +46,7 @@ img{max-width:100%;}
 
 /* ─── Layout ─── */
 .app-container{display:flex;min-height:100vh;}
-.main-wrapper{flex:1;margin-left:260px;min-height:100vh;}
+.main-wrapper{flex:1;min-width:0;margin-left:260px;min-height:100vh;}
 .container{width:100%;max-width:1080px;margin:0 auto;padding:0 2.5rem;}
 .section-padding{padding:5rem 0;}
 
@@ -156,7 +156,7 @@ img{max-width:100%;}
 .card:hover .feature-icon{background:var(--blue-700);color:#fff;}
 
 /* ─── Alumni ─── */
-.alumni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;}
+.alumni-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(215px,100%),1fr));gap:1.25rem;}
 .alumni-card.premium{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:var(--transition);box-shadow:var(--shadow-card);}
 .alumni-card.premium:hover{border-color:var(--blue-200);transform:translateY(-5px);box-shadow:0 12px 32px rgba(37,99,235,0.15);}
 
@@ -190,7 +190,7 @@ select option{background:var(--white);color:var(--text-main);}
 .filter-group{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
 .filter-group:last-child{border:none;margin:0;padding:0;}
 .filter-chip{padding:0.35rem 0.875rem;border-radius:var(--radius-full);background:var(--blue-50);border:1px solid var(--blue-100);color:var(--blue-700);font-size:0.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem;}
-.alumni-grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;}
+.alumni-grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:1.25rem;}
 .alumni-card.premium{display:flex;flex-direction:column;gap:1rem;}
 .avatar-sm.premium{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--blue-100);}
 .btn-sm{padding:0.45rem 1rem;font-size:0.8rem;}
@@ -264,3 +264,29 @@ select option{background:var(--white);color:var(--text-main);}
 
 .mentor-row:hover, .peer-card:hover { border-color: var(--blue-400) !important; background: var(--white) !important; transform: translateX(5px); box-shadow: var(--shadow-md); }
 .resource-card:hover { border-color: var(--blue-400) !important; background: var(--blue-50) !important; transform: translateY(-5px); }
+
+/* ─── Small-screen fixes: keep every section inside the viewport ─── */
+@media(max-width:768px){
+  .hero-grid{grid-template-columns:minmax(0,1fr)!important;padding:2.5rem 1.25rem!important;gap:2rem!important;}
+  .hero-stats-preview{flex-wrap:wrap;gap:1.25rem 2rem;}
+  .directory-layout{grid-template-columns:minmax(0,1fr)!important;gap:2rem!important;}
+  .dash-split{grid-template-columns:minmax(0,1fr)!important;}
+  .footer .footer-cols{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:2rem!important;}
+}
+@media(max-width:560px){
+  /* two-column form rows stack on phones */
+  form [style*="grid-template-columns"]{grid-template-columns:minmax(0,1fr)!important;}
+  .dash-evt{grid-template-columns:minmax(0,1fr)!important;}
+  .dash-evt .evc{min-height:0!important;aspect-ratio:16/9;}
+}
+@media(max-width:480px){
+  .container{padding:0 1.25rem;}
+  .footer .footer-cols{grid-template-columns:minmax(0,1fr)!important;}
+}
+@media(max-width:720px){
+  /* Admin: side-by-side panels and detail grids stack on narrow screens */
+  .admin-page [style*="grid-template-columns: 1fr 1fr"],
+  .admin-page [style*="grid-template-columns: 1.5fr 1fr"],
+  .admin-page [style*="grid-template-columns: 1.2fr 1fr"],
+  .admin-page [style*="grid-template-columns: 1fr auto"]{grid-template-columns:minmax(0,1fr)!important;}
+}

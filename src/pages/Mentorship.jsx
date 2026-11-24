@@ -260,7 +260,7 @@ const Mentorship = () => {
                   <p style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--blue-700)', marginBottom: '1.25rem' }}>
                     ✨ {suggestedMentors.length} mentor{suggestedMentors.length !== 1 ? 's' : ''} matched for "{MENTORSHIP_TYPES.find(t => t.value === mentorshipType)?.label}"
                   </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '1.25rem' }}>
                     {suggestedMentors.map((alumni, i) => (
                       <MentorCard key={alumni.id} alumni={alumni} highlight={i === 0} />
                     ))}
@@ -287,7 +287,7 @@ const Mentorship = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '1.5rem' }}>
           {filteredAll.map(alumni => (
             <MentorCard key={alumni.id} alumni={alumni} highlight={false} />
           ))}
@@ -308,7 +308,7 @@ const Mentorship = () => {
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(4px)', zIndex: 1000 }}
             />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25 }}
-              style={{ position: 'fixed', top: 0, right: 0, width: '420px', height: '100%', background: '#fff', zIndex: 1001, display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 30px rgba(0,0,0,0.08)' }}>
+              style={{ position: 'fixed', top: 0, right: 0, width: 'min(420px, 100vw)', height: '100%', background: '#fff', zIndex: 1001, display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 30px rgba(0,0,0,0.08)' }}>
               <div style={{ padding: '1.75rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                   <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg, var(--blue-700), var(--blue-500))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>

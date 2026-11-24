@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BrandLogo from './BrandLogo';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Users, GraduationCap, Calendar, UserPlus, Menu, X, ShieldCheck, ChevronRight, Bell, LogOut, LayoutGrid } from 'lucide-react';
@@ -59,10 +60,9 @@ const Navbar = () => {
         {/* Brand */}
         <div className="sidebar-brand">
           <Link to="/" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.625rem', textDecoration:'none' }}>
-            <motion.img src="/logo.png" alt="Transcend"
-               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-               style={{ height: 58, width: 'auto' }}
-            />
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
+              <BrandLogo width={176} />
+            </motion.div>
             <div className="sidebar-brand-text">
               <div className="title">
                 {!user ? 'Alumni Connect' : 
@@ -139,7 +139,7 @@ const Navbar = () => {
       {/* ── MOBILE TOPBAR ── */}
       <div className="mobile-topbar">
         <Link to="/" style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
-          <img src="/logo.png" alt="Transcend" style={{ height: 36 }} />
+          <BrandLogo width={118} />
           <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--blue-900)' }}>Alumni Connect</span>
         </Link>
         <button className="mobile-toggle" onClick={() => setMobileOpen(o => !o)}>

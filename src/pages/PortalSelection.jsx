@@ -62,7 +62,7 @@ const PortalSelection = () => {
 
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', 
         gap: '2.5rem', 
         width: '100%', 
         maxWidth: '800px', // Adjusted since we only have 2 cards now
@@ -142,10 +142,11 @@ const PortalSelection = () => {
           background: '#fff',
           border: '1px solid rgba(226, 232, 240, 0.8)',
           borderRadius: '20px',
-          padding: '1.25rem 2rem',
+          padding: '1.25rem clamp(1.25rem, 4vw, 2rem)',
           display: 'flex',
           alignItems: 'center',
-          gap: '1.5rem',
+          gap: '1rem 1.5rem',
+          flexWrap: 'wrap',
           boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)',
           maxWidth: '800px',
           width: '100%',
@@ -163,8 +164,9 @@ const PortalSelection = () => {
           e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)';
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 260px', minWidth: 0 }}>
           <div style={{
+            flexShrink: 0,
             fontSize: '1.75rem',
             width: '50px',
             height: '50px',

@@ -4,4 +4,10 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      // Express + MongoDB API (server/index.js)
+      '/api': 'http://localhost:5000',
+    },
+  },
 })

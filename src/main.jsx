@@ -1,6 +1,8 @@
 // Clear stale data from previous version
-if (localStorage.getItem('alumni_portal_user') && !localStorage.getItem('ac_version_2')) {
-  localStorage.clear();
+// (runs once per browser; the marker is set even when there was nothing to clear,
+// otherwise the first sign-in would be wiped on the next page load)
+if (!localStorage.getItem('ac_version_2')) {
+  if (localStorage.getItem('alumni_portal_user')) localStorage.clear();
   localStorage.setItem('ac_version_2', 'true');
 }
 
