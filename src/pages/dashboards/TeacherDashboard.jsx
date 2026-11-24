@@ -14,7 +14,7 @@ const TeacherDashboard = () => {
         subtitle="Monitor department growth and alumni-student engagement."
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         {[
           { label: 'Active Mentors', val: '142', change: '+12%', icon: <Users />, color: '#059669' },
           { label: 'Placements', val: '85%', change: '+5%', icon: <Zap />, color: '#f59e0b' },
@@ -32,7 +32,7 @@ const TeacherDashboard = () => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+      <div className="dash-split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '2rem' }}>
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <h3 style={{ fontSize: '1.25rem' }}>Alumni Contributions</h3>

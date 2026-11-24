@@ -1,0 +1,342 @@
+/* ─────────────────────────────────────────────────────────────
+   Overall360 · Transcend Campus OS unified gateway
+   Blue + white glass surface on a faint blueprint grid.
+   ───────────────────────────────────────────────────────────── */
+
+.o360-page {
+  --o360-navy: #0f1a3c;
+  --o360-ink: #1e293b;
+  --o360-muted: #475569;
+  --o360-soft: #64748b;
+  --o360-dim: #94a3b8;
+  --o360-line: #dbe3ee;
+  --o360-blue-700: #1d4ed8;
+  --o360-blue-600: #2563eb;
+  --o360-blue-500: #3b82f6;
+  --o360-blue-tint: #e8effd;
+  --o360-ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: safe center;
+  gap: clamp(1.75rem, 5.5vh, 3.25rem);
+  padding: clamp(2rem, 6vh, 4rem) 1.25rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--o360-ink);
+  background-color: #f3f6fc;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: center top;
+  overflow-x: hidden;
+}
+
+/* Soft light pools behind the glass so the blur has something to catch */
+.o360-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38rem 26rem at 50% 42%, rgba(255, 255, 255, 0.95), transparent 70%),
+    radial-gradient(30rem 22rem at 18% 78%, rgba(59, 130, 246, 0.10), transparent 70%),
+    radial-gradient(28rem 20rem at 86% 18%, rgba(96, 165, 250, 0.12), transparent 70%);
+}
+
+/* ── Logo (source PNG has wide padding, so crop it to the mark) ── */
+.o360-logo-wrap {
+  --w: 152px;
+  display: block;
+  width: var(--w);
+  height: calc(var(--w) * 0.222);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.o360-logo-wrap img {
+  display: block;
+  width: calc(var(--w) * 1.185);
+  max-width: none;
+  margin-top: calc(var(--w) * -0.192);
+  margin-left: calc(var(--w) * -0.088);
+}
+
+/* ── Glass card ── */
+.o360-card {
+  position: relative;
+  width: min(100%, 462px);
+  padding: 2.5rem 2.25rem 2.25rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(203, 213, 230, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 6px rgba(15, 23, 42, 0.04),
+    0 28px 64px -24px rgba(30, 64, 175, 0.22);
+}
+.o360-card--wide { width: min(100%, 680px); }
+
+.o360-head { text-align: center; margin-bottom: 1.75rem; }
+.o360-head h1 {
+  font-size: 1.6875rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--o360-navy);
+  text-wrap: balance;
+}
+.o360-head p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--o360-muted);
+  text-wrap: pretty;
+}
+
+/* ── Fields ── */
+.o360-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.o360-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--o360-ink);
+}
+.o360-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.o360-input > svg.o360-input-icon {
+  position: absolute;
+  left: 1rem;
+  width: 18px;
+  height: 18px;
+  color: var(--o360-dim);
+  pointer-events: none;
+  transition: color 0.2s var(--o360-ease);
+}
+.o360-page .o360-input input {
+  width: 100%;
+  height: 50px;
+  padding: 0 1rem 0 2.875rem;
+  border: 1px solid var(--o360-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--o360-navy);
+  font: 500 0.9375rem/1 'Plus Jakarta Sans', sans-serif;
+  box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.02);
+  transition: border-color 0.2s var(--o360-ease), box-shadow 0.2s var(--o360-ease), background 0.2s var(--o360-ease);
+}
+.o360-page .o360-input input.has-toggle { padding-right: 3rem; }
+.o360-page .o360-input input::placeholder { color: var(--o360-dim); font-weight: 500; }
+.o360-page .o360-input input[type='password']::placeholder { letter-spacing: 0.12em; font-size: 1.05rem; }
+.o360-page .o360-input input:hover { border-color: #c7d3e4; }
+.o360-page .o360-input input:focus {
+  outline: none;
+  border-color: var(--o360-blue-500);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+}
+.o360-input:focus-within > svg.o360-input-icon { color: var(--o360-blue-600); }
+
+.o360-eye {
+  position: absolute;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  color: var(--o360-soft);
+}
+.o360-eye:hover { color: var(--o360-blue-600); background: rgba(59, 130, 246, 0.08); }
+.o360-eye:focus-visible { outline: 2px solid var(--o360-blue-500); outline-offset: 1px; }
+
+/* ── Primary action ── */
+.o360-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 50px;
+  margin-top: 0.25rem;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--o360-blue-700) 0%, var(--o360-blue-500) 100%);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  box-shadow: 0 12px 24px -10px rgba(37, 99, 235, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.16s var(--o360-ease), box-shadow 0.2s var(--o360-ease), filter 0.2s var(--o360-ease);
+}
+.o360-primary svg { transition: transform 0.2s var(--o360-ease); }
+.o360-primary:hover { filter: brightness(1.05); box-shadow: 0 16px 28px -10px rgba(37, 99, 235, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+.o360-primary:hover svg { transform: translateX(3px); }
+.o360-primary:active { transform: scale(0.985); }
+.o360-primary:focus-visible { outline: 3px solid rgba(59, 130, 246, 0.45); outline-offset: 3px; }
+.o360-primary:disabled { cursor: progress; filter: saturate(0.7) brightness(1.05); }
+
+/* ── Secondary option tiles ── */
+.o360-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.875rem 0.875rem 0.875rem 0.9375rem;
+  border: 1px solid #dfe6f0;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.6);
+  text-align: left;
+  color: var(--o360-navy);
+  transition: border-color 0.2s var(--o360-ease), background 0.2s var(--o360-ease), transform 0.16s var(--o360-ease);
+}
+.o360-option:hover { border-color: #bcd0f3; background: rgba(239, 245, 255, 0.85); }
+.o360-option:active { transform: scale(0.99); }
+.o360-option:focus-visible { outline: 2px solid var(--o360-blue-500); outline-offset: 2px; }
+.o360-option-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--o360-blue-tint);
+  color: var(--o360-blue-600);
+}
+.o360-option-body { flex: 1; min-width: 0; }
+.o360-option-title { display: block; font-size: 0.9375rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.012em; }
+.o360-option-sub { display: block; margin-top: 0.125rem; font-size: 0.8125rem; font-weight: 500; line-height: 1.4; color: var(--o360-soft); }
+.o360-chevron { flex-shrink: 0; color: var(--o360-soft); transition: transform 0.2s var(--o360-ease); }
+.o360-option:hover .o360-chevron { transform: translateX(2px); color: var(--o360-blue-600); }
+
+.o360-option--compact { padding: 0.9375rem 1rem; margin-top: 0; }
+.o360-option--compact .o360-eye-icon { color: var(--o360-blue-600); flex-shrink: 0; }
+
+.o360-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin: 1.25rem 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--o360-dim);
+}
+.o360-divider::before,
+.o360-divider::after { content: ''; flex: 1; height: 1px; background: #e3e9f2; }
+
+/* ── Feedback ── */
+.o360-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: rgba(254, 242, 242, 0.85);
+  color: #b91c1c;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.o360-alert svg { flex-shrink: 0; margin-top: 1px; }
+.o360-alert--info { border-color: #bfdbfe; background: rgba(239, 246, 255, 0.9); color: #1e40af; }
+
+/* ── PIN entry ── */
+.o360-pin {
+  display: grid;
+  grid-template-columns: repeat(4, 58px);
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.25rem 0 1.5rem;
+}
+.o360-page .o360-pin input {
+  width: 58px;
+  height: 64px;
+  padding: 0;
+  border: 1px solid var(--o360-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  color: var(--o360-navy);
+  font: 800 1.5rem/1 'Plus Jakarta Sans', sans-serif;
+  caret-color: var(--o360-blue-600);
+  transition: border-color 0.2s var(--o360-ease), box-shadow 0.2s var(--o360-ease);
+}
+.o360-page .o360-pin input:focus {
+  outline: none;
+  border-color: var(--o360-blue-500);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+}
+.o360-pin.is-error input { border-color: #f87171; animation: o360-shake 0.36s var(--o360-ease); }
+@keyframes o360-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.o360-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--o360-soft);
+}
+.o360-back:hover { color: var(--o360-blue-600); }
+
+.o360-foot {
+  margin-top: -0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--o360-soft);
+  text-align: center;
+}
+.o360-foot a { color: var(--o360-blue-600); font-weight: 700; }
+.o360-foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.o360-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: o360-spin 0.7s linear infinite;
+}
+@keyframes o360-spin { to { transform: rotate(360deg); } }
+
+/* ── Small screens ── */
+@media (max-width: 480px) {
+  .o360-card { padding: 2rem 1.375rem 1.75rem; border-radius: 20px; }
+  .o360-head h1 { font-size: 1.5rem; }
+  .o360-pin { grid-template-columns: repeat(4, 54px); gap: 0.625rem; }
+  .o360-page .o360-pin input { width: 54px; height: 60px; }
+}
+@media (max-width: 560px) {
+  .o360-card--wide form [style*='grid-template-columns'] { grid-template-columns: 1fr !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .o360-page *, .o360-page *::before, .o360-page *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

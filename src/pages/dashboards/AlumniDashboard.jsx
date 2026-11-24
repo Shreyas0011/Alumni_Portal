@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import EventCover from '../../components/EventCover';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Link } from 'react-router-dom';
@@ -171,15 +172,15 @@ const AlumniDashboard = () => {
       )}
 
       {/* Login/Profile Info Bar */}
-      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.75rem 1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
           <Clock size={16} style={{ color: 'var(--blue-600)' }} />
-          <span style={{ color: 'var(--text-muted)' }}>Last Login:</span>
+          <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Last Login:</span>
           <span style={{ fontWeight: '700' }}>{formatTime(user?.lastLogin)}</span>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
           <CheckCircle size={16} style={{ color: '#059669' }} />
-          <span style={{ color: 'var(--text-muted)' }}>Last Profile Update:</span>
+          <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Last Profile Update:</span>
           <span style={{ fontWeight: '700' }}>{formatTime(user?.lastProfileUpdate)}</span>
         </div>
       </div>
@@ -197,7 +198,7 @@ const AlumniDashboard = () => {
       {activeTab === 'overview' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           {/* Quick Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
             {[
               { label: 'Achievements', value: achievements.length, icon: <Trophy size={20} />, color: '#f59e0b', bg: '#fffbeb' },
               { label: 'Community Posts', value: approvedPosts.length, icon: <MessageSquare size={20} />, color: '#3b82f6', bg: '#eff6ff' },
@@ -259,7 +260,7 @@ const AlumniDashboard = () => {
                 No alumni milestones have been posted yet.
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: '1.5rem' }}>
                 {alumniAchievements.map(ach => (
                   <div 
                     key={ach.id} 
@@ -475,9 +476,9 @@ const AlumniDashboard = () => {
               {events.map(evt => {
                 const registered = evt.registrations?.some(r => r.userId === user?.id);
                 return (
-                  <div key={evt.id} className="card" style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '1.5rem', overflow: 'hidden', padding: 0 }}>
-                    <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: '180px' }} />
-                    <div style={{ padding: '1.5rem 1.5rem 1.5rem 0' }}>
+                  <div key={evt.id} className="card dash-evt" style={{ display: 'grid', gridTemplateColumns: '200px minmax(0, 1fr)', gap: 0, overflow: 'hidden', padding: 0 }}>
+                    <EventCover event={evt} compact style={{ minHeight: '180px' }} />
+                    <div style={{ padding: '1.5rem', minWidth: 0 }}>
                       <span className="tag" style={{ marginBottom: '0.75rem', display: 'inline-block' }}>{evt.category}</span>
                       <h4 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '0.5rem' }}>{evt.title}</h4>
                       <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.6' }}>{evt.description}</p>
@@ -555,7 +556,7 @@ const AlumniDashboard = () => {
       {/* MY PROFILE TAB */}
       {activeTab === 'profile' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2.5rem', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(350px, 100%), 1fr))', gap: '2.5rem', alignItems: 'start' }}>
             {/* Profile Editing Form */}
             <div className="card" style={{ padding: '2.5rem' }}>
               <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '1.5rem', color: 'var(--text-main)' }}>Edit Profile Information</h3>

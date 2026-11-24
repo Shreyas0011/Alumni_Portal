@@ -4,6 +4,8 @@ import { Calendar, MapPin, Clock, ArrowRight, Sparkles, Check, CreditCard } from
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import useRazorpay from '../hooks/useRazorpay';
+import EventCover from '../components/EventCover';
+import { isRealPhoto } from '../lib/eventImage';
 
 const Events = () => {
   const { events, registerForEvent, unregisterFromEvent } = useData();
@@ -66,13 +68,13 @@ const Events = () => {
     <div style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%)', minHeight: '100vh', paddingBottom: '5rem' }}>
       <style>{`
         .ev-featured { display: grid; grid-template-columns: 1.2fr 1fr; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 3rem; }
-        .ev-featured-img { width: 100%; height: 100%; object-fit: cover; min-height: 380px; }
-        .ev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; }
+        .ev-featured-img { width: 100%; height: 100%; min-height: 380px; }
+        .ev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 2rem; }
         .ev-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; transition: all 0.35s ease; }
         .ev-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(37,99,235,0.1); border-color: var(--blue-200); }
         .ev-card-img { position: relative; height: 190px; overflow: hidden; }
-        .ev-card-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .ev-card:hover .ev-card-img img { transform: scale(1.08); }
+        .ev-card-img .evc > img, .ev-card-img .evc-art { transition: transform 0.5s ease; }
+                .ev-card:hover .ev-card-img .evc > img, .ev-card:hover .ev-card-img .evc-art { transform: scale(1.05); }
         .date-chip { position: absolute; top: 1rem; left: 1rem; background: white; padding: 0.4rem 0.85rem; border-radius: 10px; font-size: 0.78rem; font-weight: 800; color: var(--blue-700); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .cat-badge { position: absolute; top: 1rem; right: 1rem; background: var(--blue-700); color: white; padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.72rem; font-weight: 700; }
         .ev-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
@@ -84,7 +86,8 @@ const Events = () => {
         .reg-btn.primary { background: var(--blue-700); color: white; }
         .reg-btn.primary:hover { background: var(--blue-800); }
         .reg-btn.done { background: #f0fdf4; color: #059669; cursor: default; }
-        @media (max-width: 900px) { .ev-featured { grid-template-columns: 1fr; } .ev-featured-img { min-height: 220px; } }
+        @media (max-width: 900px) { .ev-featured { grid-template-columns: 1fr; } .ev-featured-img { min-height: 0; aspect-ratio: 16 / 9; } .ev-featured-body { padding: 1.75rem !important; } .ev-featured-body h2 { font-size: 1.5rem !important; } }
+        @media (max-width: 400px) { .ev-grid { grid-template-columns: 1fr; } }
       `}</style>
 
       {/* Toast */}
@@ -118,8 +121,8 @@ const Events = () => {
         {/* Featured Event */}
         {featuredEvent && (
           <motion.div className="ev-featured" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}>
-            <img src={featuredEvent.image} alt={featuredEvent.title} className="ev-featured-img" />
-            <div style={{ padding: '3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <EventCover event={featuredEvent} className="ev-featured-img" />
+            <div className="ev-featured-body" style={{ padding: '3rem', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <span className="badge" style={{ alignSelf: 'flex-start', marginBottom: '1.25rem' }}>Featured Event</span>
               <h2 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '1.25rem', lineHeight: 1.15 }}>{featuredEvent.title}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
@@ -180,9 +183,13 @@ const Events = () => {
               transition={{ delay: i * 0.07 }}
             >
               <div className="ev-card-img">
-                <img src={event.image} alt={event.title} />
-                <div className="date-chip">{formatDate(event.date)}</div>
-                <div className="cat-badge">{event.category}</div>
+                <EventCover event={event} compact />
+                {isRealPhoto(event.image) && (
+                  <>
+                    <div className="date-chip">{formatDate(event.date)}</div>
+                    <div className="cat-badge">{event.category}</div>
+                  </>
+                )}
               </div>
               <div className="ev-body">
                 <h3 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '0.75rem', lineHeight: 1.25 }}>{event.title}</h3>

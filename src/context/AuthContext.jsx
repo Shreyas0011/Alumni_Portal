@@ -9,12 +9,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check for saved user in localStorage
     const savedUser = localStorage.getItem('alumni_portal_user');
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
+    let parsed;
+    try { parsed = savedUser ? JSON.parse(savedUser) : null; } catch { parsed = null; }
+    if (parsed && typeof parsed === 'object' && parsed.role) {
       // Update last login
       parsed.lastLogin = new Date().toISOString();
       setUser(parsed);
       localStorage.setItem('alumni_portal_user', JSON.stringify(parsed));
+    } else if (savedUser) {
+      // Corrupt or unexpected value: drop it instead of crashing the app
+      localStorage.removeItem('alumni_portal_user');
     }
     setLoading(false);
   }, []);

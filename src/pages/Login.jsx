@@ -1,734 +1,276 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { User, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, ChevronRight, Grid3x3, XCircle, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
-import { motion } from 'framer-motion';
-import { CheckCircle, Clock, XCircle, Mail, Lock, User, Hash, Calendar, BookOpen, Phone } from 'lucide-react';
+import { api } from '../lib/api';
+import './Login.css';
 
-const Login = ({ role }) => {
-  const [tab, setTab] = useState('signin'); // signin | register
-  const [email, setEmail] = useState('');
+const Logo = () => (
+  <Link to="/" className="o360-logo-wrap" aria-label="Transcend Group of Institutions — home">
+    <img src="/logo.png" alt="Transcend Group of Institutions" />
+  </Link>
+);
+
+// Where each role lands after signing in
+const homeFor = (user) => {
+  switch (user.role) {
+    case 'admin': return '/admin';
+    case 'student': return user.profileStatus === 'incomplete' ? '/profile/complete' : '/student/dashboard';
+    case 'alumni': return '/alumni/dashboard';
+    default: return '/home';
+  }
+};
+
+const friendlyError = (err) =>
+  err.status ? err.message : 'Can’t reach the campus server. Check that the API is running and try again.';
+
+const panel = {
+  initial: { opacity: 0, x: 14 },
+  animate: { opacity: 1, x: 0, transition: { duration: 0.32, ease: [0.23, 1, 0.32, 1] } },
+  exit: { opacity: 0, x: -14, transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } },
+};
+
+const Login = () => {
+  const [view, setView] = useState('signin'); // signin | pin
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  
-  // Registration Form State
-  const [regForm, setRegForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    password: '',
-    college: '',
-    degree: 'B.Com Accounts & Finance',
-    fieldOfStudy: '',
-    eduStartYear: '',
-    eduEndYear: '',
-    schoolName: '',
-    schoolStream: 'Commerce',
-    schoolEndYear: '',
-    school10Name: '',
-    school10EndYear: '',
-    profession: '',
-    company: '',
-    linkedin: '',
-    skills: '',
-    bio: ''
-  });
-  const [regSubmitted, setRegSubmitted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [pin, setPin] = useState(['', '', '', '']);
+  const [error, setError] = useState(null); // { tone: 'error' | 'info', text }
+  const [busy, setBusy] = useState(false);
+  const pinRefs = useRef([]);
 
   const { login } = useAuth();
-  const { alumniList, pendingProfiles, submitProfile } = useData();
   const navigate = useNavigate();
 
-  const roleConfig = {
-    student: {
-      title: 'Commerce Student Portal',
-      subtitle: 'Access mentorship, find corporate internships, and track business case studies.',
-      color: 'var(--blue-600)',
-      icon: '🎓'
-    },
-    alumni: {
-      title: 'Transcend Alumni Portal',
-      subtitle: 'Reconnect with fellow CAs, financial experts, and business pioneers.',
-      color: 'var(--blue-800)',
-      icon: '🏛️'
-    },
-    admin: {
-      title: 'Commerce Admin Command Center',
-      subtitle: 'Oversee registrations, approve pending profiles, and post achievements.',
-      color: '#1e293b',
-      icon: '🛡️'
-    }
+  const finish = (user) => {
+    login(user);
+    navigate(homeFor(user));
   };
 
-  const config = roleConfig[role] || roleConfig.alumni;
-
-  const handleSignInSubmit = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-
-    // Fallback logic to support logging in without filling fields
-    const effectiveEmail = email.trim() || (
-      role === 'admin' ? 'admin@commerce.edu' :
-      role === 'student' ? 'student@commerce.edu' :
-      'priya@goldman.com' // default approved alumni
-    );
-
-    // Admin passes mock login
-    if (role === 'admin') {
-      const userData = {
-        id: 'admin-id',
-        name: 'Dean of Commerce / Admin',
-        email: effectiveEmail,
-        role: 'admin',
-        profileStatus: 'approved',
-        lastLogin: new Date().toISOString()
-      };
-      login(userData);
-      navigate('/admin');
+    setError(null);
+    if (!identifier.trim() || !password) {
+      setError({ tone: 'error', text: 'Enter your institutional ID or email and your password.' });
       return;
     }
+    setBusy(true);
+    try {
+      const { user } = await api.post('/api/auth/login', { identifier: identifier.trim(), password });
+      finish(user);
+    } catch (err) {
+      setError({ tone: err.code === 'pending' ? 'info' : 'error', text: friendlyError(err) });
+      setBusy(false);
+    }
+  };
 
-    // Student passes mock login but needs profile completion
-    if (role === 'student') {
-      const userData = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: effectiveEmail.split('@')[0],
-        email: effectiveEmail,
-        role: 'student',
-        profileStatus: 'incomplete',
-        lastLogin: new Date().toISOString()
-      };
-      login(userData);
-      navigate('/profile/complete');
+  const submitPin = async (digits) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const { user } = await api.post('/api/auth/pin', { pin: digits.join('') });
+      finish(user);
+    } catch (err) {
+      setError({ tone: 'error', text: friendlyError(err) });
+      setPin(['', '', '', '']);
+      setBusy(false);
+      requestAnimationFrame(() => pinRefs.current[0]?.focus());
+    }
+  };
+
+  const setPinAt = (index, raw) => {
+    const value = raw.replace(/\D/g, '');
+    if (!value) {
+      const next = [...pin];
+      next[index] = '';
+      setPin(next);
       return;
     }
+    // Supports typing one digit or pasting several
+    const next = [...pin];
+    let i = index;
+    for (const d of value) {
+      if (i > 3) break;
+      next[i++] = d;
+    }
+    setPin(next);
+    if (next.every(Boolean)) submitPin(next);
+    else pinRefs.current[Math.min(i, 3)]?.focus();
+  };
 
-    // Alumni authentication check
-    if (role === 'alumni') {
-      // 1. Check approved alumni list
-      const approvedAlumnus = alumniList.find(
-        a => a.email.toLowerCase() === effectiveEmail.toLowerCase()
-      );
-
-      if (approvedAlumnus) {
-        const userData = {
-          id: approvedAlumnus.id,
-          name: approvedAlumnus.name,
-          email: approvedAlumnus.email,
-          role: 'alumni',
-          profileStatus: 'approved',
-          lastLogin: new Date().toISOString(),
-          batch: approvedAlumnus.batch,
-          branch: approvedAlumnus.branch || approvedAlumnus.profession
-        };
-        login(userData);
-        navigate('/alumni/dashboard');
-        return;
-      }
-
-      // 2. Check pending profiles list
-      const pendingAlumnus = pendingProfiles.find(
-        p => p.email.toLowerCase() === effectiveEmail.toLowerCase()
-      );
-
-      if (pendingAlumnus) {
-        if (pendingAlumnus.status === 'pending') {
-          setErrorMsg('Your registration request is currently pending admin approval. You will receive an email once approved.');
-        } else if (pendingAlumnus.status === 'rejected') {
-          setErrorMsg('Your registration request has been rejected by the admin. Please contact the commerce department.');
-        } else if (pendingAlumnus.status === 'approved') {
-          // Fallback if approved in pendingProfiles but not moved to alumniList (should not happen, but just in case)
-          const userData = {
-            id: pendingAlumnus.id,
-            name: pendingAlumnus.name,
-            email: pendingAlumnus.email,
-            role: 'alumni',
-            profileStatus: 'approved',
-            lastLogin: new Date().toISOString(),
-            batch: pendingAlumnus.batch,
-            branch: pendingAlumnus.branch || pendingAlumnus.course
-          };
-          login(userData);
-          navigate('/alumni/dashboard');
-        }
-        return;
-      }
-
-      // Default fallback for demo (e.g. initial items)
-      setErrorMsg('This email is not registered in our commerce alumni registry. Please submit a registration request below.');
+  const onPinKey = (index, e) => {
+    if (e.key === 'Backspace' && !pin[index] && index > 0) {
+      pinRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      pinRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 3) {
+      pinRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleRegisterSubmit = (e) => {
-    e.preventDefault();
-    
-    // Submit registration request to Admin
-    submitProfile({
-      name: regForm.name,
-      phone: regForm.phone,
-      email: regForm.email,
-      password: regForm.password, // Keep password for login
-      college: regForm.college,
-      degree: regForm.degree,
-      fieldOfStudy: regForm.fieldOfStudy,
-      eduStartYear: regForm.eduStartYear,
-      eduEndYear: regForm.eduEndYear,
-      schoolName: regForm.schoolName,
-      schoolStream: regForm.schoolStream,
-      schoolEndYear: regForm.schoolEndYear,
-      school10Name: regForm.school10Name,
-      school10EndYear: regForm.school10EndYear,
-      profession: regForm.profession,
-      company: regForm.company,
-      linkedin: regForm.linkedin,
-      skills: regForm.skills,
-      bio: regForm.bio || `Commerce Alumnus specializing in ${regForm.degree}. Roll Number: ${regForm.rollNumber}`,
-      status: 'pending'
-    });
-
-    setRegSubmitted(true);
+  const openPin = () => {
+    setError(null);
+    setPin(['', '', '', '']);
+    setView('pin');
   };
 
-  const commerceBranches = [
-    'B.Com Accounts & Finance',
-    'B.Com Honors',
-    'B.Com Corporate Secretaryship',
-    'B.Com Computer Applications',
-    'B.Com Professional Accounting',
-    'M.Com Finance & Taxation',
-    'BBA Finance & Marketing',
-    'MBA Financial Management',
-    'Other Business Specialization'
-  ];
-
-  if (regSubmitted) {
-    return (
-      <div className="login-page" style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
-        padding: '2rem'
-      }}>
-        <motion.div 
-          className="card login-card" 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          style={{ maxWidth: '550px', width: '100%', padding: '3rem', textAlign: 'center' }}
-        >
-          <div style={{
-            width: '80px', height: '80px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 2rem', color: '#fff'
-          }}>
-            <Clock size={36} />
-          </div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1rem', color: 'var(--text-main)' }}>
-            Request Submitted!
-          </h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: '1.7', fontSize: '0.9rem' }}>
-            Your registration details have been sent to the <strong>Commerce Admin</strong> for approval.
-          </p>
-
-          <div style={{
-            background: 'var(--gray-50)', 
-            borderRadius: '16px', 
-            padding: '1.5rem',
-            border: '1px solid var(--border)', 
-            marginBottom: '2.5rem',
-            textAlign: 'left',
-            fontSize: '0.85rem'
-          }}>
-            <h4 style={{ fontWeight: '700', marginBottom: '0.75rem', color: 'var(--text-main)' }}>Registration Summary:</h4>
-            <div style={{ display: 'grid', gap: '0.5rem' }}>
-              <div><strong>Name:</strong> {regForm.name}</div>
-              <div><strong>College:</strong> {regForm.college}</div>
-              <div><strong>Education:</strong> {regForm.degree} in {regForm.fieldOfStudy} ({regForm.eduStartYear} - {regForm.eduEndYear})</div>
-              {regForm.schoolName && (
-                <div><strong>Schooling (Class XII):</strong> {regForm.schoolName} ({regForm.schoolStream}, Class of {regForm.schoolEndYear})</div>
-              )}
-              {regForm.school10Name && (
-                <div><strong>Schooling (Class X):</strong> {regForm.school10Name} (Class of {regForm.school10EndYear})</div>
-              )}
-              <div><strong>Professional:</strong> {regForm.profession} at {regForm.company}</div>
-              <div><strong>Phone Number:</strong> {regForm.phone}</div>
-              <div><strong>Email:</strong> {regForm.email}</div>
-              {regForm.linkedin && <div><strong>LinkedIn:</strong> {regForm.linkedin}</div>}
-              {regForm.skills && <div><strong>Skills:</strong> {regForm.skills}</div>}
-            </div>
-          </div>
-
-          <button 
-            type="button" 
-            className="btn btn-primary" 
-            style={{ width: '100%', padding: '1rem', background: config.color }}
-            onClick={() => {
-              setRegSubmitted(false);
-              setTab('signin');
-              setRegForm({
-                name: '',
-                phone: '',
-                email: '',
-                password: '',
-                college: '',
-                degree: 'B.Com Accounts & Finance',
-                fieldOfStudy: '',
-                eduStartYear: '',
-                eduEndYear: '',
-                schoolName: '',
-                schoolStream: 'Commerce',
-                schoolEndYear: '',
-                school10Name: '',
-                school10EndYear: '',
-                profession: '',
-                company: '',
-                linkedin: '',
-                skills: '',
-                bio: ''
-              });
-            }}
-          >
-            Return to Sign In
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
+  const backToSignIn = () => {
+    setError(null);
+    setView('signin');
+  };
 
   return (
-    <div className="login-page" style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
-      padding: '2rem'
-    }}>
-      <div className="card login-card" style={{ maxWidth: '500px', width: '100%', padding: '3rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{ 
-            fontSize: '3rem', 
-            marginBottom: '1rem',
-            background: config.color,
-            width: '80px',
-            height: '80px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '20px',
-            margin: '0 auto 1.5rem',
-            color: '#fff',
-            boxShadow: `0 10px 25px ${config.color}33`
-          }}>
-            {config.icon}
-          </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.5rem' }}>{config.title}</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{config.subtitle}</p>
-        </div>
+    <div className="o360-page">
+      <Logo />
 
-        {/* Tab Selection */}
-        {role === 'alumni' && (
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: '2rem' }}>
-            <button 
-              type="button"
-              onClick={() => { setTab('signin'); setErrorMsg(''); }} 
-              style={{ 
-                flex: 1, 
-                paddingBottom: '1rem', 
-                borderBottom: tab === 'signin' ? `3px solid ${config.color}` : 'none',
-                fontWeight: '700',
-                color: tab === 'signin' ? 'var(--text-main)' : 'var(--text-dim)',
-                fontSize: '0.9rem'
-              }}
-            >
-              Sign In
-            </button>
-            <button 
-              type="button"
-              onClick={() => { setTab('register'); setErrorMsg(''); }} 
-              style={{ 
-                flex: 1, 
-                paddingBottom: '1rem', 
-                borderBottom: tab === 'register' ? `3px solid ${config.color}` : 'none',
-                fontWeight: '700',
-                color: tab === 'register' ? 'var(--text-main)' : 'var(--text-dim)',
-                fontSize: '0.9rem'
-              }}
-            >
-              Request Access
-            </button>
-          </div>
-        )}
+      <motion.main
+        className="o360-card"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        layout
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {view === 'signin' ? (
+            <motion.div key="signin" {...panel}>
+              <header className="o360-head">
+                <h1>Sign in to Overall360</h1>
+                <p>Transcend Campus OS Unified Gateway</p>
+              </header>
 
-        {errorMsg && (
-          <div style={{ 
-            background: '#fef2f2', 
-            border: '1px solid #fee2e2', 
-            color: '#dc2626', 
-            padding: '0.875rem 1rem', 
-            borderRadius: '12px', 
-            fontSize: '0.85rem', 
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: '600'
-          }}>
-            <XCircle size={16} style={{ flexShrink: 0 }} />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        {tab === 'signin' ? (
-          <form onSubmit={handleSignInSubmit}>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                <Mail size={14} style={{ color: config.color }} /> Email Address
-              </label>
-              <input 
-                type="email" 
-                placeholder="alumni@commerce.edu" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ padding: '0.875rem 1rem' }}
-              />
-            </div>
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                  <Lock size={14} style={{ color: config.color }} /> Password
-                </label>
-                <a href="#" style={{ fontSize: '0.8rem', color: config.color, fontWeight: '600' }}>Forgot?</a>
-              </div>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ padding: '0.875rem 1rem' }}
-              />
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', background: config.color }}>
-              Sign In to Portal
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                <User size={14} style={{ color: config.color }} /> Full Name
-              </label>
-              <input 
-                type="text" 
-                placeholder="Sarah Jenkins" 
-                required 
-                value={regForm.name}
-                onChange={(e) => setRegForm({...regForm, name: e.target.value})}
-                style={{ padding: '0.875rem 1rem' }}
-              />
-            </div>
-
-            {/* Education Details */}
-            <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#f8fafc' }}>
-              <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🎓 Education Details
-              </h4>
-              
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                  University / College Name
-                </label>
-                <input 
-                  type="text" 
-                  placeholder="Transcend School of Business / Delhi University" 
-                  required 
-                  value={regForm.college}
-                  onChange={(e) => setRegForm({...regForm, college: e.target.value})}
-                  style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Degree
-                  </label>
-                  <select 
-                    value={regForm.degree}
-                    onChange={(e) => setRegForm({...regForm, degree: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', width: '100%', fontSize: '0.85rem' }}
-                  >
-                    {commerceBranches.map((br) => (
-                      <option key={br} value={br}>{br}</option>
-                    ))}
-                  </select>
+              {error && (
+                <div className={`o360-alert ${error.tone === 'info' ? 'o360-alert--info' : ''}`} role="alert">
+                  {error.tone === 'info' ? <Info size={16} /> : <XCircle size={16} />}
+                  <span>{error.text}</span>
                 </div>
+              )}
+
+              <form className="o360-form" onSubmit={handleSignIn} noValidate>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Field of Study
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="Finance, Accounting, taxation" 
-                    required 
-                    value={regForm.fieldOfStudy}
-                    onChange={(e) => setRegForm({...regForm, fieldOfStudy: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
+                  <label className="o360-label" htmlFor="o360-id">Institutional ID or Email</label>
+                  <div className="o360-input">
+                    <User className="o360-input-icon" strokeWidth={1.75} aria-hidden="true" />
+                    <input
+                      id="o360-id"
+                      type="text"
+                      inputMode="email"
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck="false"
+                      placeholder="e.g. user@transcendgroup.org"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Start Year
-                  </label>
-                  <input 
-                    type="number" 
-                    placeholder="2017" 
-                    required 
-                    min="1950" 
-                    max="2035"
-                    value={regForm.eduStartYear}
-                    onChange={(e) => setRegForm({...regForm, eduStartYear: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
+                  <label className="o360-label" htmlFor="o360-pw">Password</label>
+                  <div className="o360-input">
+                    <Lock className="o360-input-icon" strokeWidth={1.75} aria-hidden="true" />
+                    <input
+                      id="o360-pw"
+                      className="has-toggle"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder="••••••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="o360-eye"
+                      onClick={() => setShowPassword((s) => !s)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Graduation Year (End Year)
-                  </label>
-                  <input 
-                    type="number" 
-                    placeholder="2020" 
-                    required 
-                    min="1950" 
-                    max="2035"
-                    value={regForm.eduEndYear}
-                    onChange={(e) => setRegForm({...regForm, eduEndYear: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
+
+                <button type="submit" className="o360-primary" disabled={busy}>
+                  {busy ? (
+                    <><span className="o360-spinner" aria-hidden="true" /> Signing in…</>
+                  ) : (
+                    <>Sign In to Campus Workspace <ArrowRight size={17} strokeWidth={2.25} /></>
+                  )}
+                </button>
+              </form>
+
+              <button type="button" className="o360-option" onClick={openPin}>
+                <span className="o360-option-icon" aria-hidden="true">
+                  <Grid3x3 size={18} strokeWidth={2} />
+                </span>
+                <span className="o360-option-body">
+                  <span className="o360-option-title">Pin login for Hostel Mess and Warden</span>
+                  <span className="o360-option-sub">Instant 4-digit PIN access for Wardens &amp; Mess staff</span>
+                </span>
+                <ChevronRight className="o360-chevron" size={18} aria-hidden="true" />
+              </button>
+
+              <div className="o360-divider">or</div>
+
+              <button type="button" className="o360-option o360-option--compact" onClick={() => navigate('/home')}>
+                <Eye className="o360-eye-icon" size={18} strokeWidth={2} aria-hidden="true" />
+                <span className="o360-option-body">
+                  <span className="o360-option-title">View only option</span>
+                </span>
+                <ChevronRight className="o360-chevron" size={18} aria-hidden="true" />
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div key="pin" {...panel}>
+              <header className="o360-head">
+                <h1>Enter your PIN</h1>
+                <p>4-digit access for Wardens &amp; Mess staff</p>
+              </header>
+
+              {error && (
+                <div className="o360-alert" role="alert">
+                  <XCircle size={16} />
+                  <span>{error.text}</span>
                 </div>
-              </div>
+              )}
 
-              {/* Schooling Details */}
-              <div style={{ height: '1px', background: 'var(--border)', margin: '0.75rem 0' }} />
-              
-              <h5 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🏫 Schooling Details (Class XII)
-              </h5>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                  School Name
-                </label>
-                <input 
-                  type="text" 
-                  placeholder="E.g. St. Mary's Higher Secondary School" 
-                  required 
-                  value={regForm.schoolName}
-                  onChange={(e) => setRegForm({...regForm, schoolName: e.target.value})}
-                  style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Stream
-                  </label>
-                  <select 
-                    value={regForm.schoolStream}
-                    onChange={(e) => setRegForm({...regForm, schoolStream: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', width: '100%', fontSize: '0.85rem' }}
-                  >
-                    <option value="Commerce">Commerce</option>
-                    <option value="Science">Science</option>
-                    <option value="Arts">Arts</option>
-                    <option value="Other">Other</option>
-                  </select>
+              <form onSubmit={(e) => { e.preventDefault(); if (pin.every(Boolean)) submitPin(pin); }}>
+                <div className={`o360-pin ${error ? 'is-error' : ''}`} role="group" aria-label="4-digit PIN">
+                  {pin.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => { pinRefs.current[i] = el; }}
+                      type="password"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={4}
+                      aria-label={`PIN digit ${i + 1}`}
+                      autoFocus={i === 0}
+                      disabled={busy}
+                      value={digit}
+                      onChange={(e) => setPinAt(i, e.target.value)}
+                      onKeyDown={(e) => onPinKey(i, e)}
+                      onFocus={(e) => e.target.select()}
+                    />
+                  ))}
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Graduation Year
-                  </label>
-                  <input 
-                    type="number" 
-                    placeholder="2017" 
-                    required 
-                    min="1950" 
-                    max="2035"
-                    value={regForm.schoolEndYear}
-                    onChange={(e) => setRegForm({...regForm, schoolEndYear: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
+                <button type="submit" className="o360-primary" disabled={busy || !pin.every(Boolean)}>
+                  {busy ? <><span className="o360-spinner" aria-hidden="true" /> Checking PIN…</> : 'Unlock'}
+                </button>
+              </form>
 
-              {/* Schooling Details (Class X) */}
-              <div style={{ height: '1px', background: 'var(--border)', margin: '0.75rem 0' }} />
-              
-              <h5 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🏫 Schooling Details (Class X)
-              </h5>
+              <button type="button" className="o360-back" onClick={backToSignIn}>
+                <ArrowLeft size={14} /> Back to sign in
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.main>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    School Name
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="E.g. St. Mary's High School" 
-                    required 
-                    value={regForm.school10Name}
-                    onChange={(e) => setRegForm({...regForm, school10Name: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Graduation Year (Class X)
-                  </label>
-                  <input 
-                    type="number" 
-                    placeholder="2015" 
-                    required 
-                    min="1950" 
-                    max="2035"
-                    value={regForm.school10EndYear}
-                    onChange={(e) => setRegForm({...regForm, school10EndYear: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Professional Info */}
-            <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#f8fafc' }}>
-              <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                💼 Professional Experience
-              </h4>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Current Job Role / Designation
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="Investment Analyst" 
-                    required 
-                    value={regForm.profession}
-                    onChange={(e) => setRegForm({...regForm, profession: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Organization / Company
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="Goldman Sachs" 
-                    required 
-                    value={regForm.company}
-                    onChange={(e) => setRegForm({...regForm, company: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    LinkedIn URL
-                  </label>
-                  <input 
-                    type="url" 
-                    placeholder="https://linkedin.com/in/username" 
-                    required 
-                    value={regForm.linkedin}
-                    onChange={(e) => setRegForm({...regForm, linkedin: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                    Skills (comma separated)
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="CFA, M&A, Financial Modeling" 
-                    required 
-                    value={regForm.skills}
-                    onChange={(e) => setRegForm({...regForm, skills: e.target.value})}
-                    style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Phone size={14} style={{ color: config.color }} /> Phone Number
-                </label>
-                <input 
-                  type="tel" 
-                  placeholder="9876543210" 
-                  required 
-                  pattern="[0-9]{10}"
-                  maxLength="10"
-                  value={regForm.phone}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    setRegForm({...regForm, phone: val});
-                  }}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                  <Mail size={14} style={{ color: config.color }} /> Email Address
-                </label>
-                <input 
-                  type="email" 
-                  placeholder="sarah@example.com" 
-                  required 
-                  value={regForm.email}
-                  onChange={(e) => setRegForm({...regForm, email: e.target.value})}
-                  style={{ padding: '0.875rem 1rem' }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                <Lock size={14} style={{ color: config.color }} /> Set Password
-              </label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                required 
-                value={regForm.password}
-                onChange={(e) => setRegForm({...regForm, password: e.target.value})}
-                style={{ padding: '0.875rem 1rem' }}
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', background: config.color, marginTop: '0.5rem' }}>
-              Submit Request for Approval
-            </button>
-          </form>
-        )}
-
-        <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          <Link to="/" style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>← Back to Portals</Link>
-        </div>
-      </div>
+      <p className="o360-foot">
+        Alumni without an account? <Link to="/request-access">Request access</Link>
+      </p>
     </div>
   );
 };

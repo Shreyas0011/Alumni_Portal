@@ -71,7 +71,7 @@ const Registration = () => {
           className="card"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          style={{ padding: '4rem 3rem', borderRadius: '24px', textAlign: 'center', maxWidth: '600px', background: '#fff' }}
+          style={{ padding: 'clamp(2rem, 6vw, 4rem) clamp(1.25rem, 5vw, 3rem)', borderRadius: '24px', textAlign: 'center', maxWidth: '600px', background: '#fff' }}
         >
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
@@ -124,7 +124,7 @@ const Registration = () => {
   return (
     <div className="registration-page section-padding">
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '6rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 'clamp(2rem, 6vw, 6rem)', alignItems: 'center' }}>
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -158,7 +158,7 @@ const Registration = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="card"
-            style={{ padding: '3.5rem', borderRadius: '24px', background: '#fff' }}
+            style={{ padding: 'clamp(1.25rem, 5vw, 3.5rem)', borderRadius: '24px', background: '#fff' }}
           >
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               {/* Section 1: Personal Information */}

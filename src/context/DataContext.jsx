@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { api } from '../lib/api';
+import {
+  initialAchievements, initialPosts, initialPendingProfiles, initialAlumniList,
+  initialBroadcasts, initialEvents, initialAutomationSettings
+} from '../data/seedData';
 
 const DataContext = createContext();
 
@@ -14,520 +19,6 @@ const generateBirthdayPoster = (name) => {
   ];
   return wishes[Math.floor(Math.random() * wishes.length)];
 };
-
-const initialAchievements = [
-  {
-    id: 'ach1',
-    title: 'NAAC A++ Accreditation Renewed',
-    description: 'Our institution has successfully renewed its NAAC A++ accreditation, reaffirming our commitment to academic excellence in business and commerce studies.',
-    date: '2026-03-15',
-    category: 'Accreditation',
-    postedBy: 'admin',
-    createdAt: '2026-03-15T10:00:00Z'
-  },
-  {
-    id: 'ach2',
-    title: 'National Commerce & Case Study Championship - First Place',
-    description: 'Our students won the National Case Study Challenge held at SRCC Delhi, competing against 500+ teams from elite business schools.',
-    date: '2026-04-20',
-    category: 'Competition',
-    postedBy: 'admin',
-    createdAt: '2026-04-20T14:30:00Z'
-  },
-  {
-    id: 'ach3',
-    title: 'Bloomberg Terminal Hub Inauguration',
-    description: 'A state-of-the-art financial markets simulation lab equipped with 12 Bloomberg Terminals was inaugurated to enhance hands-on investment research.',
-    date: '2026-05-01',
-    category: 'Infrastructure',
-    postedBy: 'admin',
-    createdAt: '2026-05-01T09:00:00Z'
-  }
-];
-
-const initialPosts = [
-  {
-    id: 'post1',
-    authorId: 'demo-alumni-1',
-    authorName: 'Priya Sharma',
-    authorBatch: '2018',
-    content: 'Thrilled to share that I have been promoted to Investment Banking Vice President at Goldman Sachs! Grateful to our business faculty for laying the foundation.',
-    status: 'approved',
-    createdAt: '2026-05-10T08:00:00Z',
-    approvedAt: '2026-05-10T10:00:00Z'
-  },
-  {
-    id: 'post2',
-    authorId: 'demo-alumni-2',
-    authorName: 'Rahul Mehta',
-    authorBatch: '2020',
-    content: 'Looking for commerce mentees interested in Corporate Taxation and GST Audit. Happy to guide final year students through CA and CFA preparation.',
-    status: 'approved',
-    createdAt: '2026-05-12T14:00:00Z',
-    approvedAt: '2026-05-12T15:30:00Z'
-  }
-];
-
-const initialPendingProfiles = [
-  {
-    id: 'pp1',
-    name: 'Anita Desai',
-    email: 'anita.desai@gmail.com',
-    batch: '2019',
-    dob: '1997-08-15',
-    profession: 'Corporate Auditor',
-    company: 'Deloitte',
-    phone: '9876543210',
-    linkedin: 'linkedin.com/in/anitadesai',
-    bio: 'Audit and compliance professional with 5+ years of experience in statutory audits and financial reporting.',
-    status: 'pending',
-    submittedAt: '2026-05-18T11:00:00Z'
-  },
-  {
-    id: 'pp2',
-    name: 'Vikram Singh',
-    email: 'vikram.s@outlook.com',
-    batch: '2021',
-    dob: '1999-03-22',
-    profession: 'Investment Analyst',
-    company: 'Ernst & Young',
-    phone: '8765432109',
-    linkedin: 'linkedin.com/in/vikramsingh',
-    bio: 'Equity research analyst passionate about value investing and portfolio valuation.',
-    status: 'pending',
-    submittedAt: '2026-05-19T09:30:00Z'
-  }
-];
-
-const initialAlumniList = [
-  {
-    id: 'al1',
-    name: 'Priya Sharma',
-    email: 'priya@goldman.com',
-    role: 'alumni',
-    dob: new Date().toISOString().split('T')[0],
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Accounts & Finance',
-    fieldOfStudy: 'Financial Analysis',
-    eduStartYear: '2015',
-    eduEndYear: '2018',
-    batch: '2018',
-    profession: 'IB Vice President',
-    company: 'Goldman Sachs',
-    linkedin: 'https://linkedin.com/in/priyasharmapremium',
-    skills: 'Valuation, M&A, Equity Research',
-    bio: 'Investment Banking VP at Goldman Sachs. Gladly mentors final-year students on investment portfolios and valuation frameworks.'
-  },
-  {
-    id: 'al2',
-    name: 'Rahul Mehta',
-    email: 'rahul@kpmg.com',
-    role: 'alumni',
-    dob: '1998-12-25',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Honors',
-    fieldOfStudy: 'Auditing and Assurance',
-    eduStartYear: '2017',
-    eduEndYear: '2020',
-    batch: '2020',
-    profession: 'Audit Partner',
-    company: 'KPMG',
-    linkedin: 'https://linkedin.com/in/rahulmehtacagst',
-    skills: 'Taxation, Auditing, GST Compliance',
-    bio: 'CA and Audit Partner at KPMG. Offers audit readiness guides, tax advice, and CA exam preparation paths.'
-  },
-  {
-    id: 'al3',
-    name: 'Sneha Reddy',
-    email: 'sneha@pwc.com',
-    role: 'alumni',
-    dob: new Date().toISOString().split('T')[0],
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Corporate Secretaryship',
-    fieldOfStudy: 'Corporate Law',
-    eduStartYear: '2014',
-    eduEndYear: '2017',
-    batch: '2017',
-    profession: 'Tax Manager',
-    company: 'PwC',
-    linkedin: 'https://linkedin.com/in/snehareddytax',
-    skills: 'CFA, International Taxation, Corporate Law',
-    bio: 'Tax Manager at PwC, specializing in transfer pricing and cross-border taxation. Enthusiastic about mentorship.'
-  },
-  {
-    id: 'al4',
-    name: 'Arjun Patel',
-    email: 'arjun@hdfc.com',
-    role: 'alumni',
-    dob: '1997-07-04',
-    college: 'Transcend College of Commerce',
-    degree: 'M.Com Finance & Taxation',
-    fieldOfStudy: 'Financial Management',
-    eduStartYear: '2017',
-    eduEndYear: '2019',
-    batch: '2019',
-    profession: 'Financial Controller',
-    company: 'HDFC Bank',
-    linkedin: 'https://linkedin.com/in/arjunpatelfin',
-    skills: 'Treasury Management, Corporate Finance',
-    bio: 'Financial Controller at HDFC Bank. Specialist in liquidity planning, retail banking, and capital structure.'
-  },
-  {
-    id: 'al5',
-    name: 'Rohith',
-    email: 'rohith@ey.com',
-    role: 'alumni',
-    dob: '2004-05-21',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Professional Accounting',
-    fieldOfStudy: 'Accounting Systems',
-    eduStartYear: '2023',
-    eduEndYear: '2026',
-    batch: '2026',
-    profession: 'Chartered Accountant',
-    company: 'Ernst & Young',
-    linkedin: 'https://linkedin.com/in/rohithcaey',
-    skills: 'Financial Accounting, Audit, IFRS',
-    bio: 'Newly qualified CA working at EY. Eager to help final year students crack CA finals.'
-  },
-  {
-    id: 'al6',
-    name: 'Anita Desai',
-    email: 'anita.desai@deloitte.com',
-    role: 'alumni',
-    dob: '1997-08-15',
-    college: 'Transcend College of Commerce',
-    degree: 'BBA Finance',
-    fieldOfStudy: 'Audit & Compliance',
-    eduStartYear: '2016',
-    eduEndYear: '2019',
-    batch: '2019',
-    profession: 'Senior Corporate Auditor',
-    company: 'Deloitte',
-    linkedin: 'https://linkedin.com/in/anitadesaiaudit',
-    skills: 'Statutory Audit, Compliance, Risk Management',
-    bio: 'Audit and compliance partner with 5+ years of experience in statutory audits.'
-  },
-  {
-    id: 'al7',
-    name: 'Vikram Singh',
-    email: 'vikram.singh@ey.com',
-    role: 'alumni',
-    dob: '1999-03-22',
-    college: 'Transcend College of Commerce',
-    degree: 'MBA Financial Management',
-    fieldOfStudy: 'Investment Analysis',
-    eduStartYear: '2019',
-    eduEndYear: '2021',
-    batch: '2021',
-    profession: 'Senior Investment Analyst',
-    company: 'Ernst & Young',
-    linkedin: 'https://linkedin.com/in/vikramsinghpe',
-    skills: 'Equity Research, Portfolio Valuation, M&A',
-    bio: 'Equity research analyst passionate about value investing and portfolio valuation.'
-  },
-  {
-    id: 'al8',
-    name: 'Meera Iyer',
-    email: 'meera.iyer@jpmorgan.com',
-    role: 'alumni',
-    dob: '1998-11-12',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Honors',
-    fieldOfStudy: 'Treasury & Wealth Management',
-    eduStartYear: '2015',
-    eduEndYear: '2018',
-    batch: '2018',
-    profession: 'Treasury Manager',
-    company: 'JP Morgan Chase',
-    linkedin: 'https://linkedin.com/in/meeraiyertreasury',
-    skills: 'Cash Management, FX Risk, Asset Valuation',
-    bio: 'Treasury Manager at JPMC. Experienced in liquidity forecasting and foreign exchange risk management.'
-  },
-  {
-    id: 'al9',
-    name: 'Kabir Malhotra',
-    email: 'kabir@pwc.com',
-    role: 'alumni',
-    dob: '2000-04-10',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Accounts & Finance',
-    fieldOfStudy: 'Indirect Taxes',
-    eduStartYear: '2019',
-    eduEndYear: '2022',
-    batch: '2022',
-    profession: 'Senior Tax Associate',
-    company: 'PwC',
-    linkedin: 'https://linkedin.com/in/kabirmalhotrapwc',
-    skills: 'GST, Corporate Taxation, Auditing',
-    bio: 'Tax consultant focusing on corporate tax restructuring and audit readiness.'
-  },
-  {
-    id: 'al10',
-    name: 'Tanvi Joshi',
-    email: 'tanvi.joshi@mckinsey.com',
-    role: 'alumni',
-    dob: '1998-09-02',
-    college: 'Transcend College of Commerce',
-    degree: 'M.Com Finance',
-    fieldOfStudy: 'Strategic Business Management',
-    eduStartYear: '2018',
-    eduEndYear: '2020',
-    batch: '2020',
-    profession: 'Management Consultant',
-    company: 'McKinsey & Company',
-    linkedin: 'https://linkedin.com/in/tanvijoshipartner',
-    skills: 'Strategy Consulting, Corporate Finance, Business Case Studies',
-    bio: 'Strategic advisor helping Fortune 500 companies optimize capital structure and scale operations.'
-  },
-  {
-    id: 'al11',
-    name: 'Rohan Goel',
-    email: 'rohan.goel@blackstone.com',
-    role: 'alumni',
-    dob: '1999-06-25',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Honors',
-    fieldOfStudy: 'Asset Management',
-    eduStartYear: '2018',
-    eduEndYear: '2021',
-    batch: '2021',
-    profession: 'Private Equity Associate',
-    company: 'Blackstone Group',
-    linkedin: 'https://linkedin.com/in/rohangoelequity',
-    skills: 'Leveraged Buyouts, Valuation, Private Equity',
-    bio: 'PE professional. Guide students on financial modeling, business valuation, and investment theses.'
-  },
-  {
-    id: 'al12',
-    name: 'Ananya Gupta',
-    email: 'ananya.gupta@unilever.com',
-    role: 'alumni',
-    dob: '1998-05-18',
-    college: 'Transcend College of Commerce',
-    degree: 'BBA Finance',
-    fieldOfStudy: 'Corporate Strategy',
-    eduStartYear: '2017',
-    eduEndYear: '2020',
-    batch: '2020',
-    profession: 'Commercial Finance Partner',
-    company: 'Unilever',
-    linkedin: 'https://linkedin.com/in/ananyaguptacorp',
-    skills: 'Budgeting, FMCG Finance, Cost Analysis',
-    bio: 'Overseeing financial planning and commercial strategy for major food and beverage brands at Unilever.'
-  },
-  {
-    id: 'al13',
-    name: 'Shreyas Nair',
-    email: 'shreyas.student@commerce.edu',
-    role: 'student',
-    dob: '2005-02-14',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Accounts & Finance',
-    fieldOfStudy: 'Accounting Systems',
-    eduStartYear: '2024',
-    eduEndYear: '2027',
-    batch: '2027',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/shreyasnairtest',
-    skills: 'Financial Auditing, Valuation',
-    bio: 'Commerce undergraduate student eager to connect with industry experts and CA mentors.'
-  },
-  {
-    id: 'al14',
-    name: 'Divya Pillai',
-    email: 'divya.student@commerce.edu',
-    role: 'student',
-    dob: '2005-08-20',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Honors',
-    fieldOfStudy: 'Finance & Investments',
-    eduStartYear: '2024',
-    eduEndYear: '2027',
-    batch: '2027',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/divyapillaicfa',
-    skills: 'Case Competitions, Corporate Finance',
-    bio: 'Final year B.Com student preparing for CFA Level 1. Winner of the SRCC Delhi Case Study competition.'
-  },
-  {
-    id: 'al15',
-    name: 'Karan Shah',
-    email: 'karan.student@commerce.edu',
-    role: 'student',
-    dob: '2005-03-30',
-    college: 'Transcend College of Commerce',
-    degree: 'BBA Finance',
-    fieldOfStudy: 'Portfolio Management',
-    eduStartYear: '2024',
-    eduEndYear: '2027',
-    batch: '2027',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/karanshahmarket',
-    skills: 'Stock Valuations, Asset Management',
-    bio: 'Aspiring fund manager active in the college Investment Club.'
-  },
-  {
-    id: 'al16',
-    name: 'Aisha Siddiqui',
-    email: 'aisha.student@commerce.edu',
-    role: 'student',
-    dob: '2006-07-04',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Professional Accounting',
-    fieldOfStudy: 'Tax Systems',
-    eduStartYear: '2025',
-    eduEndYear: '2028',
-    batch: '2028',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/aishasiddiquitax',
-    skills: 'GST, Accounting Standard Analysis',
-    bio: 'Second-year commerce student interested in taxation law and statutory auditing.'
-  },
-  {
-    id: 'al17',
-    name: 'Nehal Sharma',
-    email: 'nehal.student@commerce.edu',
-    role: 'student',
-    dob: '2004-11-22',
-    college: 'Transcend College of Commerce',
-    degree: 'M.Com Finance',
-    fieldOfStudy: 'International Finance',
-    eduStartYear: '2025',
-    eduEndYear: '2027',
-    batch: '2027',
-    profession: 'Graduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/nehalsharmadouble',
-    skills: 'Financial Econometrics, Statistical Models',
-    bio: 'Graduate commerce student analyzing macro-economic trends and international bond markets.'
-  },
-  {
-    id: 'al18',
-    name: 'Aditya Rao',
-    email: 'aditya.student@commerce.edu',
-    role: 'student',
-    dob: '2005-09-17',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Corporate Secretaryship',
-    fieldOfStudy: 'Corporate Governance',
-    eduStartYear: '2024',
-    eduEndYear: '2027',
-    batch: '2027',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/adityaraocs',
-    skills: 'Company Law, Compliance Management',
-    bio: 'Preparing for Company Secretary (CS) exams alongside college courses.'
-  },
-  {
-    id: 'al19',
-    name: 'Pranav Joshi',
-    email: 'pranav.student@commerce.edu',
-    role: 'student',
-    dob: '2006-12-05',
-    college: 'Transcend College of Commerce',
-    degree: 'BBA Finance & Marketing',
-    fieldOfStudy: 'Venture Capital',
-    eduStartYear: '2025',
-    eduEndYear: '2028',
-    batch: '2028',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/pranavjoshivc',
-    skills: 'Market Research, Pitch Decks',
-    bio: 'Founder of the student startup incubator. Interested in fintech products.'
-  },
-  {
-    id: 'al20',
-    name: 'Ritika Sen',
-    email: 'ritika.student@commerce.edu',
-    role: 'student',
-    dob: '2005-05-30',
-    college: 'Transcend College of Commerce',
-    degree: 'B.Com Computer Applications',
-    fieldOfStudy: 'Financial Software',
-    eduStartYear: '2024',
-    eduEndYear: '2027',
-    batch: '2027',
-    profession: 'Undergraduate Student',
-    company: 'Transcend College of Commerce',
-    linkedin: 'https://linkedin.com/in/ritikasensql',
-    skills: 'Python for Finance, Tally, SQL',
-    bio: 'Bridging the gap between financial ledger management and analytics software development.'
-  }
-];
-
-const initialBroadcasts = [
-  {
-    id: 'bc1',
-    title: 'Annual Alumni Meet 2026',
-    message: 'We are excited to announce the Annual Alumni Meet on June 15, 2026 at the main campus. All alumni are cordially invited.',
-    priority: 'high',
-    createdAt: '2026-05-15T08:00:00Z',
-    sentVia: ['email', 'whatsapp']
-  }
-];
-
-const initialEvents = [
-  {
-    id: 'evt1',
-    title: 'Global Corporate Finance & Tax Summit 2026',
-    date: '2026-06-15',
-    time: '10:00 AM - 4:00 PM',
-    location: 'Main Campus Auditorium',
-    category: 'Summit',
-    description: 'Join top financial leaders, bankers, and tax consultants for networking and career insights.',
-    fee: 500,
-    maxCapacity: 200,
-    registrations: [],
-    image: 'https://placehold.co/800x400/1e3a8a/ffffff?text=Finance+Summit+2026',
-    featured: true
-  },
-  {
-    id: 'evt2',
-    title: 'Homecoming Weekend & Gala Dinner',
-    date: '2026-07-12',
-    time: '6:30 PM Onwards',
-    location: 'Grand Hall',
-    category: 'Reunion',
-    description: 'Celebrate with a grand gala dinner, business networking, and guest performances.',
-    fee: 2000,
-    maxCapacity: 150,
-    registrations: [],
-    image: 'https://placehold.co/800x400/1d4ed8/ffffff?text=Gala+Dinner'
-  },
-  {
-    id: 'evt3',
-    title: 'Mergers & Acquisitions Valuation Workshop',
-    date: '2026-08-05',
-    time: '2:00 PM - 5:00 PM',
-    location: 'Virtual',
-    category: 'Workshop',
-    description: 'Master asset pricing and corporate evaluation techniques under industry veterans.',
-    fee: 0,
-    maxCapacity: 100,
-    registrations: [],
-    image: 'https://placehold.co/800x400/2563eb/ffffff?text=M+And+A+Workshop'
-  },
-  {
-    id: 'evt4',
-    title: 'Alumni Investment Pitch Night',
-    date: '2026-09-18',
-    time: '5:00 PM - 8:00 PM',
-    location: 'Finance Innovation Hub',
-    category: 'Networking',
-    description: 'Watch alumni founders and finance executives present projects to venture funds and angels.',
-    fee: 300,
-    maxCapacity: 80,
-    registrations: [],
-    image: 'https://placehold.co/800x400/1e3a8a/ffffff?text=Pitch+Night'
-  }
-];
 
 export const DataProvider = ({ children }) => {
   const [achievements, setAchievements] = useState(() => {
@@ -586,14 +77,7 @@ export const DataProvider = ({ children }) => {
 
   const [automationSettings, setAutomationSettings] = useState(() => {
     const saved = localStorage.getItem('ac_birthday_automation_settings');
-    return saved ? JSON.parse(saved) : {
-      enabled: true,
-      sendEmail: true,
-      sendWhatsapp: true,
-      emailSubject: 'Happy Birthday from Commerce Alumni Connect, {name}! 🎂',
-      emailBody: `Dear {name},\n\nOn behalf of the Commerce Alumni Association, we wish you a fantastic and very Happy Birthday! 🎂✨\n\nWe celebrate your achievements as a {profession} at {company} and are proud to have you as part of our commerce legacy.\n\nMay the year ahead bring you closer to your professional goals, with continued growth, prosperity, and joy!\n\nBest regards,\nCommerce Alumni Connect Team`,
-      whatsappTemplate: `🎉 *Happy Birthday, {name}!* 🎂\n\nOn behalf of the Commerce Alumni Association, we wish you a fantastic day filled with success, laughter, and great achievements! 🌟\n\n- Transcend Alumni Connect Team`
-    };
+    return saved ? JSON.parse(saved) : initialAutomationSettings;
   });
 
   const [birthdayLogs, setBirthdayLogs] = useState(() => {
@@ -606,17 +90,67 @@ export const DataProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : {};
   });
 
-  // Persist to localStorage
-  useEffect(() => { localStorage.setItem('ac_achievements', JSON.stringify(achievements)); }, [achievements]);
-  useEffect(() => { localStorage.setItem('ac_posts', JSON.stringify(posts)); }, [posts]);
-  useEffect(() => { localStorage.setItem('ac_pending_profiles', JSON.stringify(pendingProfiles)); }, [pendingProfiles]);
-  useEffect(() => { localStorage.setItem('ac_alumni_list', JSON.stringify(alumniList)); }, [alumniList]);
-  useEffect(() => { localStorage.setItem('ac_broadcasts', JSON.stringify(broadcasts)); }, [broadcasts]);
-  useEffect(() => { localStorage.setItem('ac_events', JSON.stringify(events)); }, [events]);
-  useEffect(() => { localStorage.setItem('ac_notifications', JSON.stringify(notifications)); }, [notifications]);
-  useEffect(() => { localStorage.setItem('ac_birthday_automation_settings', JSON.stringify(automationSettings)); }, [automationSettings]);
-  useEffect(() => { localStorage.setItem('ac_birthday_logs', JSON.stringify(birthdayLogs)); }, [birthdayLogs]);
-  useEffect(() => { localStorage.setItem('ac_wished_alumni', JSON.stringify(wishedAlumni)); }, [wishedAlumni]);
+  // ── MongoDB sync ──────────────────────────────────────────────
+  // MongoDB (via /api) is the source of truth. localStorage is only an
+  // offline cache so the UI still renders if the API is unreachable.
+  const slices = {
+    achievements, posts, pendingProfiles, alumniList, broadcasts, events,
+    notifications, automationSettings, birthdayLogs, wishedAlumni
+  };
+  const setters = {
+    achievements: setAchievements, posts: setPosts, pendingProfiles: setPendingProfiles,
+    alumniList: setAlumniList, broadcasts: setBroadcasts, events: setEvents,
+    notifications: setNotifications, automationSettings: setAutomationSettings,
+    birthdayLogs: setBirthdayLogs, wishedAlumni: setWishedAlumni
+  };
+  const cacheKeys = {
+    achievements: 'ac_achievements', posts: 'ac_posts', pendingProfiles: 'ac_pending_profiles',
+    alumniList: 'ac_alumni_list', broadcasts: 'ac_broadcasts', events: 'ac_events',
+    notifications: 'ac_notifications', automationSettings: 'ac_birthday_automation_settings',
+    birthdayLogs: 'ac_birthday_logs', wishedAlumni: 'ac_wished_alumni'
+  };
+  const [dbStatus, setDbStatus] = useState('connecting'); // connecting | online | offline
+  const lastSynced = useRef({});
+
+  // Load everything from MongoDB once on mount
+  useEffect(() => {
+    let cancelled = false;
+    api.get('/api/data')
+      .then((data) => {
+        if (cancelled) return;
+        Object.entries(data).forEach(([key, value]) => {
+          if (setters[key] && value !== undefined && value !== null) {
+            lastSynced.current[key] = JSON.stringify(value);
+            setters[key](value);
+          }
+        });
+        setDbStatus('online');
+      })
+      .catch((err) => {
+        console.warn('MongoDB API unreachable, using local cache:', err.message);
+        if (!cancelled) setDbStatus('offline');
+      });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Write changed slices back to MongoDB (debounced) and to the local cache
+  const serialized = Object.fromEntries(Object.entries(slices).map(([k, v]) => [k, JSON.stringify(v)]));
+  const serializedKey = Object.values(serialized).join('\n');
+  useEffect(() => {
+    Object.entries(serialized).forEach(([k, json]) => localStorage.setItem(cacheKeys[k], json));
+    if (dbStatus !== 'online') return;
+    const timer = setTimeout(() => {
+      Object.entries(serialized).forEach(([key, json]) => {
+        if (lastSynced.current[key] === json) return;
+        lastSynced.current[key] = json;
+        api.put(`/api/data/${key}`, JSON.parse(json))
+          .catch((err) => console.error(`Failed to save ${key} to MongoDB:`, err.message));
+      });
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serializedKey, dbStatus]);
 
   // Achievement CRUD
   const addAchievement = (ach) => {
@@ -655,8 +189,17 @@ export const DataProvider = ({ children }) => {
   };
 
   // Profile approval
-  const submitProfile = (profile) => {
-    const newProfile = { ...profile, id: `pp_${Date.now()}`, status: 'pending', submittedAt: new Date().toISOString() };
+  // Passwords never live in client state: the server hashes them into the
+  // users collection and stores the profile (without password) in MongoDB.
+  const submitProfile = async (profile) => {
+    const { password, ...rest } = profile;
+    const newProfile = { ...rest, id: `pp_${Date.now()}`, status: 'pending', submittedAt: new Date().toISOString() };
+    if (dbStatus === 'online') {
+      const saved = await api.post('/api/auth/register', { profile: newProfile, password });
+      lastSynced.current.pendingProfiles = JSON.stringify([saved, ...pendingProfiles]);
+      setPendingProfiles(prev => [saved, ...prev]);
+      return saved;
+    }
     setPendingProfiles(prev => [newProfile, ...prev]);
     return newProfile;
   };
@@ -801,7 +344,8 @@ export const DataProvider = ({ children }) => {
       getTodayBirthdays,
       automationSettings, setAutomationSettings,
       birthdayLogs, setBirthdayLogs,
-      wishedAlumni
+      wishedAlumni,
+      dbStatus
     }}>
       {children}
     </DataContext.Provider>

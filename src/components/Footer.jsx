@@ -1,4 +1,5 @@
 import React from 'react';
+import BrandLogo from './BrandLogo';
 import { Link } from 'react-router-dom';
 import { Mail, Link2, Code2 } from 'lucide-react';
 
@@ -15,7 +16,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link to="/" style={{ display:'inline-flex', flexDirection:'column', gap:'0.5rem', marginBottom:'1.25rem' }}>
-              <img src="/logo.png" alt="Transcend" style={{ height:40, width:'auto', filter:'brightness(1.4) saturate(0.2)' }}/>
+              <BrandLogo width={170} onDark />
               <span style={{ fontSize:'0.9rem', fontWeight:700, color:'#fff' }}>Alumni Connect <span style={{ color:'var(--blue-400)' }}>Portal</span></span>
             </Link>
             <p style={{ color:'rgba(255,255,255,0.45)', lineHeight:1.8, fontSize:'0.85rem', marginBottom:'1.5rem' }}>

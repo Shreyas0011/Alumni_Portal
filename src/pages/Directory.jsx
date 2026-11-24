@@ -284,7 +284,7 @@ const Directory = () => {
               </div>
             ) : (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '3rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: 'clamp(1.25rem, 4vw, 3rem)' }}>
                   {paginatedAlumni.map((alumnus, index) => (
                     <motion.div 
                       key={alumnus.id} 
@@ -346,11 +346,11 @@ const Directory = () => {
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', padding: '1.25rem 2rem', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: 'clamp(2rem, 6vw, 4rem)', padding: '1.25rem clamp(1rem, 4vw, 2rem)', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                       Showing <strong>{(currentPage - 1) * itemsPerPage + 1}</strong> to <strong>{Math.min(currentPage * itemsPerPage, filteredAlumni.length)}</strong> of <strong>{filteredAlumni.length}</strong> profiles
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                       <button 
                         className="btn btn-outline" 
                         style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', minHeight: '36px', height: '36px' }} 
@@ -410,7 +410,7 @@ const Directory = () => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 25 }}
-                style={{ position: 'fixed', top: 0, right: 0, width: '500px', height: '100%', background: '#fff', zIndex: 1001, padding: '3rem', display: 'flex', flexDirection: 'column', overflowY: 'auto', boxShadow: '-10px 0 35px rgba(0,0,0,0.08)' }}
+                style={{ position: 'fixed', top: 0, right: 0, width: 'min(500px, 100vw)', height: '100%', background: '#fff', zIndex: 1001, padding: 'clamp(1.5rem, 5vw, 3rem)', display: 'flex', flexDirection: 'column', overflowY: 'auto', boxShadow: '-10px 0 35px rgba(0,0,0,0.08)' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
                   <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
@@ -548,7 +548,7 @@ const Directory = () => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 25 }}
-                style={{ position: 'fixed', top: 0, right: 0, width: '450px', height: '100%', background: '#fff', zIndex: 1001, padding: '3rem', display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 35px rgba(0,0,0,0.08)' }}
+                style={{ position: 'fixed', top: 0, right: 0, width: 'min(450px, 100vw)', height: '100%', background: '#fff', zIndex: 1001, padding: 'clamp(1.5rem, 5vw, 3rem)', display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 35px rgba(0,0,0,0.08)' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
                   <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
