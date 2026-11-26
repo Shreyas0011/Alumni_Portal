@@ -10,11 +10,10 @@ const userSchema = new Schema(
     name: { type: String, required: true },
     role: {
       type: String,
-      enum: ['admin', 'student', 'alumni', 'teacher', 'warden', 'mess'],
+      enum: ['superadmin', 'admin', 'professor', 'student', 'alumni'],
       required: true,
     },
     passwordHash: { type: String },
-    pinHash: { type: String }, // 4-digit PIN for wardens / mess staff
     profileStatus: { type: String, default: 'approved' },
     batch: String,
     branch: String,

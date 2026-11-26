@@ -6,6 +6,15 @@ import {
   initialBroadcasts, initialEvents, initialAutomationSettings,
 } from '../src/data/seedData.js';
 
+/* One sign-in email per role (RBAC). All use SEED_DEMO_PASSWORD from server/.env.
+   Alumni sign in with their own registered email (e.g. the seeded alumni list). */
+export const ROLE_ACCOUNTS = [
+  { email: 'superadmin@transcendgroup.org', institutionalId: 'TGI-SUP-001', name: 'Super Admin', role: 'superadmin' },
+  { email: 'admin@transcendgroup.org', institutionalId: 'TGI-ADM-001', name: 'Dean of Commerce / Admin', role: 'admin' },
+  { email: 'professor@transcendgroup.org', institutionalId: 'TGI-PRF-001', name: 'Prof. Demo Faculty', role: 'professor' },
+  { email: 'student@transcendgroup.org', institutionalId: 'TGI-STU-001', name: 'Demo Student', role: 'student', profileStatus: 'incomplete' },
+];
+
 /**
  * Seeds an empty database with the portal's starter content and demo accounts.
  * Demo credentials come from server/.env (SEED_*), never from source code.
@@ -15,10 +24,8 @@ export async function seedIfEmpty({ force = false } = {}) {
   if (!force && (await User.estimatedDocumentCount()) > 0) return false;
 
   const demoPassword = process.env.SEED_DEMO_PASSWORD;
-  const wardenPin = process.env.SEED_WARDEN_PIN;
-  const messPin = process.env.SEED_MESS_PIN;
-  if (!demoPassword || !/^\d{4}$/.test(wardenPin || '') || !/^\d{4}$/.test(messPin || '')) {
-    console.warn('[seed] SEED_DEMO_PASSWORD / SEED_WARDEN_PIN / SEED_MESS_PIN missing in server/.env — skipping seed.');
+  if (!demoPassword) {
+    console.warn('[seed] SEED_DEMO_PASSWORD missing in server/.env — skipping seed.');
     return false;
   }
 
@@ -32,12 +39,7 @@ export async function seedIfEmpty({ force = false } = {}) {
 
   const passwordHash = await bcrypt.hash(demoPassword, 10);
 
-  const staff = [
-    { email: 'admin@transcendgroup.org', institutionalId: 'TGI-ADM-001', name: 'Dean of Commerce / Admin', role: 'admin', passwordHash },
-    { email: 'student@transcendgroup.org', institutionalId: 'TGI-STU-001', name: 'Demo Student', role: 'student', passwordHash, profileStatus: 'incomplete' },
-    { institutionalId: 'TGI-WDN-001', name: 'Hostel Warden', role: 'warden', pinHash: await bcrypt.hash(wardenPin, 10) },
-    { institutionalId: 'TGI-MESS-001', name: 'Mess Staff', role: 'mess', pinHash: await bcrypt.hash(messPin, 10) },
-  ];
+  const staff = ROLE_ACCOUNTS.map((a) => ({ ...a, passwordHash }));
 
   // Every seeded alumnus and pending applicant can sign in with the demo password,
   // so the approval flow can be tried end to end.
@@ -78,6 +80,22 @@ export async function seedIfEmpty({ force = false } = {}) {
  * in the layout, with real photos or with the drawn cover (empty image).
  */
 export async function migrateData() {
+  // RBAC: make sure every role has its sign-in account (never overwrites existing ones)
+  const demoPassword = process.env.SEED_DEMO_PASSWORD;
+  if (demoPassword) {
+    let passwordHash = null;
+    for (const account of ROLE_ACCOUNTS) {
+      if (await User.exists({ email: account.email })) continue;
+      passwordHash = passwordHash || (await bcrypt.hash(demoPassword, 10));
+      await User.create({ ...account, passwordHash });
+      console.log(`[migrate] Created ${account.role} account ${account.email}`);
+    }
+  }
+  // PIN sign-in was removed: drop the old warden / mess staff accounts
+  const removed = await User.collection.deleteMany({ role: { $in: ['warden', 'mess'] } });
+  if (removed.deletedCount) console.log(`[migrate] Removed ${removed.deletedCount} PIN-only account(s).`);
+  await User.collection.updateMany({ pinHash: { $exists: true } }, { $unset: { pinHash: '' } });
+
   const Events = LIST_COLLECTIONS.events;
   const stale = await Events.find({ image: /placehold\.co/i }).lean();
   if (!stale.length) return;

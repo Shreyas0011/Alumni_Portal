@@ -211,7 +211,7 @@ const Mentorship = () => {
       </AnimatePresence>
 
       {/* Hero */}
-      <section style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)', padding: '6rem 0 4rem', color: '#fff', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)', padding: 'clamp(2.5rem, 5vw, 3.5rem) 0 clamp(2rem, 4vw, 2.75rem)', color: '#fff', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div className="container" style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
@@ -221,18 +221,18 @@ const Mentorship = () => {
             <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: '900', marginBottom: '1rem', lineHeight: 1.1 }}>
               Connect with Commerce <span style={{ color: '#fbbf24' }}>Alumni Mentors</span>
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.1rem', maxWidth: '560px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
               Browse real alumni profiles, select your mentorship area, and get matched with the best mentor for your career goals.
             </p>
           </motion.div>
         </div>
       </section>
 
-      <div className="container" style={{ padding: '3rem 2.5rem' }}>
+      <div className="container" style={{ padding: '2rem clamp(1.25rem, 3vw, 2.5rem) 3rem', maxWidth: '1280px' }}>
 
         {/* Smart Mentorship Matcher */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '24px', padding: '2.5rem', marginBottom: '3rem', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+          style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '24px', padding: 'clamp(1.25rem, 3vw, 2rem)', marginBottom: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
             <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'var(--blue-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue-700)' }}>
               <Sparkles size={20} />
@@ -260,7 +260,7 @@ const Mentorship = () => {
                   <p style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--blue-700)', marginBottom: '1.25rem' }}>
                     ✨ {suggestedMentors.length} mentor{suggestedMentors.length !== 1 ? 's' : ''} matched for "{MENTORSHIP_TYPES.find(t => t.value === mentorshipType)?.label}"
                   </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '1.25rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '1.25rem' }}>
                     {suggestedMentors.map((alumni, i) => (
                       <MentorCard key={alumni.id} alumni={alumni} highlight={i === 0} />
                     ))}
@@ -287,7 +287,7 @@ const Mentorship = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '1.5rem' }}>
           {filteredAll.map(alumni => (
             <MentorCard key={alumni.id} alumni={alumni} highlight={false} />
           ))}

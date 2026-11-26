@@ -161,8 +161,8 @@ const Directory = () => {
   };
 
   return (
-    <div className="directory-page" style={{ background: '#fdfdfd', minHeight: '100vh', padding: '8rem 0' }}>
-      <div className="container">
+    <div className="directory-page" style={{ background: '#fdfdfd', minHeight: '100vh', padding: 'clamp(1.5rem, 4vw, 2.5rem) 0 3rem' }}>
+      <div className="container" style={{ maxWidth: '1280px' }}>
         
         {/* Toast Notification */}
         <AnimatePresence>
@@ -181,26 +181,26 @@ const Directory = () => {
         </AnimatePresence>
 
         {/* Immersive Header */}
-        <header style={{ marginBottom: '6rem', textAlign: 'center' }}>
+        <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="hero-badge" style={{ marginBottom: '2rem' }}>
+            <div className="hero-badge" style={{ marginBottom: '1rem' }}>
               <Sparkles size={14} style={{ marginRight: '8px' }} />
               Global Professional Registry ({allAlumni.length} Profiles)
             </div>
-            <h1 style={{ fontSize: '5rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-3px' }}>
+            <h1 style={{ fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)', fontWeight: 900, marginBottom: '1.25rem', letterSpacing: '-2px' }}>
               Discover the <span className="text-gradient">Network.</span>
             </h1>
             
             <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative' }}>
-              <div className="glass-premium" style={{ display: 'flex', alignItems: 'center', padding: '1.5rem 2.5rem', borderRadius: 'var(--radius-2xl)', gap: '1.5rem' }}>
-                <Search size={28} className="text-primary" />
+              <div className="glass-premium" style={{ display: 'flex', alignItems: 'center', padding: '1rem 1.75rem', borderRadius: 'var(--radius-2xl)', gap: '1rem' }}>
+                <Search size={22} className="text-primary" />
                 <input 
                   type="text" 
                   placeholder="Search by name, expertise, or company..." 
-                  style={{ background: 'transparent', border: 'none', fontSize: '1.25rem', width: '100%', outline: 'none' }}
+                  style={{ background: 'transparent', border: 'none', fontSize: '1.05rem', width: '100%', outline: 'none', padding: 0 }}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -209,17 +209,17 @@ const Directory = () => {
           </motion.div>
         </header>
 
-        <div className="directory-layout" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '5rem' }}>
+        <div className="directory-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: '2rem', alignItems: 'start' }}>
           
           {/* Filters Sidebar */}
-          <aside>
-            <div style={{ position: 'sticky', top: '100px' }}>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Filter size={24} className="text-primary" />
+          <aside className="directory-filters" style={{ order: 2, position: 'sticky', top: '1.5rem' }}>
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Filter size={20} className="text-primary" />
                 Filters
               </h3>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
                 {/* Department Filter */}
                 <div>
                   <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Department</label>
@@ -263,7 +263,7 @@ const Directory = () => {
               {(selectedDept || selectedLocation || selectedBatch) && (
                 <button 
                   className="btn btn-outline" 
-                  style={{ width: '100%', padding: '1rem', marginTop: '2.5rem', color: '#dc2626', borderColor: '#fca5a5', cursor: 'pointer' }}
+                  style={{ width: '100%', padding: '0.75rem', marginTop: '1.5rem', color: '#dc2626', borderColor: '#fca5a5', cursor: 'pointer' }}
                   onClick={() => {
                     setSelectedDept('');
                     setSelectedLocation('');
@@ -277,14 +277,14 @@ const Directory = () => {
           </aside>
 
           {/* Clean Alumni Grid */}
-          <main>
+          <main style={{ order: 1, minWidth: 0 }}>
             {paginatedAlumni.length === 0 ? (
               <div className="card" style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-muted)' }}>
                 No matching profiles found!
               </div>
             ) : (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: 'clamp(1.25rem, 4vw, 3rem)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '1.25rem' }}>
                   {paginatedAlumni.map((alumnus, index) => (
                     <motion.div 
                       key={alumnus.id} 
@@ -294,11 +294,11 @@ const Directory = () => {
                       viewport={{ once: true }}
                       transition={{ delay: Math.min(index * 0.05, 0.3) }}
                       whileHover={{ y: -6 }}
-                      style={{ padding: '2.5rem', borderRadius: '24px', cursor: 'pointer' }}
+                      style={{ padding: '1.5rem', borderRadius: '20px', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
                       onClick={() => setSelectedAlumni(alumnus)}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '2rem' }}>
-                        <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 900 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                        <div style={{ flexShrink: 0, width: '52px', height: '52px', borderRadius: '16px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 900 }}>
                           {alumnus.initials}
                         </div>
                         <div>
@@ -307,7 +307,7 @@ const Directory = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem', flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                           <Briefcase size={16} style={{ color: 'var(--blue-700)' }} />
                           <span>{alumnus.company}</span>
@@ -346,7 +346,7 @@ const Directory = () => {
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: 'clamp(2rem, 6vw, 4rem)', padding: '1.25rem clamp(1rem, 4vw, 2rem)', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', padding: '1rem clamp(1rem, 4vw, 1.5rem)', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                       Showing <strong>{(currentPage - 1) * itemsPerPage + 1}</strong> to <strong>{Math.min(currentPage * itemsPerPage, filteredAlumni.length)}</strong> of <strong>{filteredAlumni.length}</strong> profiles
                     </div>

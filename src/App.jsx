@@ -1,21 +1,22 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Home from './pages/Home';
 import Directory from './pages/Directory';
 import Registration from './pages/Registration';
 import Mentorship from './pages/Mentorship';
 import Events from './pages/Events';
 import AdminDashboard from './pages/AdminDashboard';
-import PortalSelection from './pages/PortalSelection';
 import Login from './pages/Login';
 import RequestAccess from './pages/RequestAccess';
 import ProfileCompletion from './pages/ProfileCompletion';
 import StudentDashboard from './pages/dashboards/StudentDashboard';
 import AlumniDashboard from './pages/dashboards/AlumniDashboard';
+import TeacherDashboard from './pages/dashboards/TeacherDashboard';
 import AnimatedBackground from './components/AnimatedBackground';
+import RequireRole from './components/RequireRole';
+import ScrollToTop from './components/ScrollToTop';
 import { useAuth } from './context/AuthContext';
+import { PAGE_ACCESS, homeFor } from './lib/roles';
 
 const Layout = ({ children }) => {
   const { user } = useAuth();
@@ -28,40 +29,52 @@ const Layout = ({ children }) => {
         <main className="main-content">
           {children}
         </main>
-        <Footer />
       </div>
     </div>
   );
 };
 
-function App() {
-  const { user } = useAuth();
+// Sign-in is the first page; signed-in users go straight to their own portal
+const Gateway = () => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <Navigate to={homeFor(user)} replace /> : <Login />;
+};
 
+// Page wrapped in the sidebar layout and guarded by role
+const guarded = (path, page, { layout = true } = {}) => (
+  <RequireRole roles={PAGE_ACCESS[path]}>
+    {layout ? <Layout>{page}</Layout> : page}
+  </RequireRole>
+);
+
+function App() {
   return (
     <>
+      <ScrollToTop />
       <AnimatedBackground />
       <Routes>
-        <Route path="/" element={<Layout><PortalSelection /></Layout>} />
-        <Route path="/home" element={<Layout><Home /></Layout>} />
-        <Route path="/directory" element={<Layout><Directory /></Layout>} />
-        <Route path="/register" element={<Layout><Registration /></Layout>} />
-        <Route path="/mentorship" element={<Layout><Mentorship /></Layout>} />
-        <Route path="/events" element={<Layout><Events /></Layout>} />
-        
-        {/* Portal Routes */}
-        {/* Overall360 unified gateway — role comes from the account in MongoDB */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/login/:role" element={<Login />} />
+        {/* Sign-in gateway */}
+        <Route path="/" element={<Gateway />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/login/:role" element={<Navigate to="/" replace />} />
         <Route path="/request-access" element={<RequestAccess />} />
+        <Route path="/register" element={<Layout><Registration /></Layout>} />
 
-        {/* Profile Completion */}
-        <Route path="/profile/complete" element={<Layout><ProfileCompletion /></Layout>} />
+        {/* Shared pages (role-checked) */}
+        <Route path="/directory" element={guarded('/directory', <Directory />)} />
+        <Route path="/mentorship" element={guarded('/mentorship', <Mentorship />)} />
+        <Route path="/events" element={guarded('/events', <Events />)} />
 
-        {/* Role-specific Dashboards */}
-        <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
-        <Route path="/alumni/dashboard" element={<Layout><AlumniDashboard /></Layout>} />
-        
-        <Route path="/admin" element={<AdminDashboard />} />
+        {/* Role portals */}
+        <Route path="/profile/complete" element={guarded('/profile/complete', <ProfileCompletion />)} />
+        <Route path="/student/dashboard" element={guarded('/student/dashboard', <StudentDashboard />)} />
+        <Route path="/alumni/dashboard" element={guarded('/alumni/dashboard', <AlumniDashboard />)} />
+        <Route path="/professor/dashboard" element={guarded('/professor/dashboard', <TeacherDashboard />)} />
+        <Route path="/admin" element={guarded('/admin', <AdminDashboard />)} />
+
+        {/* Anything else (including the removed About Platform page) */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

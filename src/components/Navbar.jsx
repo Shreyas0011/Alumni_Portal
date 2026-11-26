@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import BrandLogo from './BrandLogo';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Users, GraduationCap, Calendar, UserPlus, Menu, X, ShieldCheck, ChevronRight, Bell, LogOut, LayoutGrid } from 'lucide-react';
+import { Users, GraduationCap, Calendar, Menu, X, ShieldCheck, ChevronRight, LogOut, LayoutGrid } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { homeFor, canAccess, isAdminRole, ROLE_LABELS } from '../lib/roles';
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -17,35 +18,24 @@ const Navbar = () => {
   };
 
   const baseLinks = [
-    { name: 'About Platform', path: '/home', icon: <Home size={18} /> },
     { name: 'Directory', path: '/directory', icon: <Users size={18} />, badge: 'New' },
     { name: 'Mentorship', path: '/mentorship', icon: <GraduationCap size={18} /> },
     { name: 'Events', path: '/events', icon: <Calendar size={18} />, badge: '3' },
   ];
 
-  const loggedOutLinks = [
-    ...baseLinks,
-    { name: 'Portals', path: '/', icon: <LayoutGrid size={18} /> },
-    { name: 'Register', path: '/register', icon: <UserPlus size={18} /> },
-  ];
-
+  // Only the pages this role may open (RBAC, see src/lib/roles.js)
   const getRoleLinks = () => {
-    const dashboardPath = user ? `/${user.role}/dashboard` : null;
-    const links = [];
-    
-    if (dashboardPath) {
-      links.push({ name: 'Dashboard', path: dashboardPath, icon: <LayoutGrid size={18} /> });
-    }
-
-    const filteredBase = baseLinks.filter(l => {
-      if (!user) return true;
-      if (user.role === 'alumni') return true;
-      const allowed = ['About Platform', 'Directory', 'Mentorship'];
-      return allowed.includes(l.name);
-    });
-
-    return [...links, ...filteredBase.filter(l => l.name !== 'About Platform' || !dashboardPath)];
+    if (!user) return [];
+    const home = homeFor(user);
+    const links = isAdminRole(user.role)
+      ? []
+      : [{ name: 'Dashboard', path: home, icon: <LayoutGrid size={18} /> }];
+    return [...links, ...baseLinks.filter(l => canAccess(user, l.path))];
   };
+
+  const homePath = homeFor(user);
+  const labels = user ? ROLE_LABELS[user.role] : null;
+  const showAdmin = Boolean(user) && isAdminRole(user.role);
 
   const navLinks = getRoleLinks();
 
@@ -59,20 +49,16 @@ const Navbar = () => {
       >
         {/* Brand */}
         <div className="sidebar-brand">
-          <Link to="/" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.625rem', textDecoration:'none' }}>
+          <Link to={homePath} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.625rem', textDecoration:'none' }}>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
               <BrandLogo width={176} />
             </motion.div>
             <div className="sidebar-brand-text">
               <div className="title">
-                {!user ? 'Alumni Connect' : 
-                 user.role === 'admin' ? 'Admin Portal' : 
-                 user.role === 'student' ? 'Student Portal' : 'Alumni Portal'}
+                {labels ? labels.portal : 'Alumni Connect'}
               </div>
               <div className="sub">
-                {!user ? 'Portal · Transcend' : 
-                 user.role === 'admin' ? 'Manage · Secure' : 
-                 user.role === 'student' ? 'Learn · Connect' : 'Stay Connected'}
+                {labels ? labels.tagline : 'Portal · Transcend'}
               </div>
             </div>
           </Link>
@@ -103,23 +89,27 @@ const Navbar = () => {
             );
           })}
 
-          <div className="sidebar-section-label" style={{ marginTop: '0.5rem' }}>Administration</div>
-          <Link to="/admin" className={`sidebar-link ${loc.pathname === '/admin' ? 'active' : ''}`}>
-            <span className="sidebar-link-icon"><ShieldCheck size={18} /></span>
-            <span className="sidebar-link-text">Admin Portal</span>
-          </Link>
+          {showAdmin && (
+            <>
+              <div className="sidebar-section-label" style={{ marginTop: '0.5rem' }}>Administration</div>
+              <Link to="/admin" className={`sidebar-link ${loc.pathname === '/admin' ? 'active' : ''}`}>
+                <span className="sidebar-link-icon"><ShieldCheck size={18} /></span>
+                <span className="sidebar-link-text">Admin Portal</span>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Bottom user widget */}
         <div className="sidebar-footer">
           {user ? (
             <div className="sidebar-user" style={{ cursor: 'pointer' }} onClick={handleLogout} title="Click to logout">
-              <div className="sidebar-avatar" style={{ background: user.role === 'admin' ? '#1e293b' : 'var(--blue-800)' }}>
+              <div className="sidebar-avatar" style={{ background: isAdminRole(user.role) ? '#1e293b' : 'var(--blue-800)' }}>
                 {user.name.charAt(0)}
               </div>
               <div className="sidebar-user-info" style={{ flex: 1 }}>
                 <div className="name">{user.name}</div>
-                <div className="role" style={{ textTransform: 'capitalize' }}>{user.role}</div>
+                <div className="role">{labels?.name}</div>
               </div>
               <LogOut size={15} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
             </div>
@@ -138,7 +128,7 @@ const Navbar = () => {
 
       {/* ── MOBILE TOPBAR ── */}
       <div className="mobile-topbar">
-        <Link to="/" style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
+        <Link to={homePath} style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
           <BrandLogo width={118} />
           <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--blue-900)' }}>Alumni Connect</span>
         </Link>
@@ -164,9 +154,11 @@ const Navbar = () => {
                 <span className="sidebar-link-icon"><LogOut size={18} /></span> Logout
               </button>
             )}
-            <Link to="/admin" className="sidebar-link" onClick={() => setMobileOpen(false)}>
-              <span className="sidebar-link-icon"><ShieldCheck size={18} /></span> Admin Portal
-            </Link>
+            {showAdmin && (
+              <Link to="/admin" className="sidebar-link" onClick={() => setMobileOpen(false)}>
+                <span className="sidebar-link-icon"><ShieldCheck size={18} /></span> Admin Portal
+              </Link>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
