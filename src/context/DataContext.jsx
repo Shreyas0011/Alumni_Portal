@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
+import { useAuth } from './AuthContext';
 import {
   initialAchievements, initialPosts, initialPendingProfiles, initialAlumniList,
   initialBroadcasts, initialEvents, initialAutomationSettings
@@ -109,12 +110,25 @@ export const DataProvider = ({ children }) => {
     notifications: 'ac_notifications', automationSettings: 'ac_birthday_automation_settings',
     birthdayLogs: 'ac_birthday_logs', wishedAlumni: 'ac_wished_alumni'
   };
-  const [dbStatus, setDbStatus] = useState('connecting'); // connecting | online | offline
+  const { user } = useAuth();
+  const sessionKey = user ? `${user.id}:${user.role}` : null;
+  const [dbStatus, setDbStatus] = useState('connecting'); // connecting | online | offline | signed-out
   const lastSynced = useRef({});
 
-  // Load everything from MongoDB once on mount
+  // Load from MongoDB whenever a user signs in (the API only serves signed-in
+  // users, and returns what that user's role may see)
   useEffect(() => {
     let cancelled = false;
+    lastSynced.current = {};
+    if (!sessionKey) {
+      setDbStatus('signed-out');
+      // Pending profiles are other people's applications (admin-only): don't
+      // leave them in this browser after the session ends
+      setPendingProfiles([]);
+      localStorage.removeItem(cacheKeys.pendingProfiles);
+      return undefined;
+    }
+    setDbStatus('connecting');
     api.get('/api/data')
       .then((data) => {
         if (cancelled) return;
@@ -132,7 +146,7 @@ export const DataProvider = ({ children }) => {
       });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessionKey]);
 
   // Write changed slices back to MongoDB (debounced) and to the local cache
   const serialized = Object.fromEntries(Object.entries(slices).map(([k, v]) => [k, JSON.stringify(v)]));
@@ -193,15 +207,24 @@ export const DataProvider = ({ children }) => {
   // users collection and stores the profile (without password) in MongoDB.
   const submitProfile = async (profile) => {
     const { password, ...rest } = profile;
-    const newProfile = { ...rest, id: `pp_${Date.now()}`, status: 'pending', submittedAt: new Date().toISOString() };
-    if (dbStatus === 'online') {
-      const saved = await api.post('/api/auth/register', { profile: newProfile, password });
-      lastSynced.current.pendingProfiles = JSON.stringify([saved, ...pendingProfiles]);
-      setPendingProfiles(prev => [saved, ...prev]);
-      return saved;
+    const newProfile = { ...rest, id: `pp_${Date.now()}`, status: rest.status || 'pending', submittedAt: new Date().toISOString() };
+    let saved = newProfile;
+    if (password) {
+      // New alumni access request: creates the (pending) account on the server
+      saved = await api.post('/api/auth/register', { profile: newProfile, password });
+    } else if (user) {
+      // Signed-in user (e.g. student completing their profile)
+      try {
+        saved = await api.post('/api/auth/profile', { profile: newProfile });
+      } catch (err) {
+        console.error('Failed to save profile to MongoDB:', err.message);
+      }
     }
-    setPendingProfiles(prev => [newProfile, ...prev]);
-    return newProfile;
+    // Server already stored it: mark as synced so it isn't written twice
+    const next = [saved, ...pendingProfiles];
+    lastSynced.current.pendingProfiles = JSON.stringify(next);
+    setPendingProfiles(next);
+    return saved;
   };
   const approveProfile = (id) => {
     const profile = pendingProfiles.find(p => p.id === id);

@@ -139,7 +139,7 @@ const RequestAccess = () => {
             </div>
           </div>
 
-          <Link to="/login" className="o360-primary" style={{ marginBottom: '0.75rem' }}>
+          <Link to="/" className="o360-primary" style={{ marginBottom: '0.75rem' }}>
             Return to sign in
           </Link>
           <button
@@ -179,7 +179,7 @@ const RequestAccess = () => {
 
   return (
     <div className="o360-page">
-      <Link to="/login" className="o360-logo-wrap" aria-label="Back to sign in">
+      <Link to="/" className="o360-logo-wrap" aria-label="Back to sign in">
         <img src="/logo.png" alt="Transcend Group of Institutions" />
       </Link>
       <motion.div
@@ -509,7 +509,7 @@ const RequestAccess = () => {
             </button>
           </form>
 
-        <Link to="/login" className="o360-back">
+        <Link to="/" className="o360-back">
           <ArrowLeft size={14} /> Back to sign in
         </Link>
       </motion.div>

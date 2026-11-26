@@ -635,296 +635,290 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', alignItems: 'start' }}>
-              {/* Left Column: Today's Birthdays & Logs */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Row 1: today's birthdays + automation controls */}
+            <div className="bday-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1.5rem', marginBottom: '1.5rem', alignItems: 'stretch' }}>
+              {/* Today's Birthdays Card */}
+              <div className="card" style={{ padding: '2rem', height: '100%' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  🎉 Today's Celebrations ({todayBirthdays.length})
+                </h4>
                 
-                {/* Today's Birthdays Card */}
-                <div className="card" style={{ padding: '2rem' }}>
-                  <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    🎉 Today's Celebrations ({todayBirthdays.length})
-                  </h4>
-                  
-                  {todayBirthdays.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)', background: 'var(--gray-50)', borderRadius: '12px' }}>
-                      <Cake size={32} style={{ marginBottom: '0.5rem', color: 'var(--text-dim)' }} />
-                      <p style={{ fontSize: '0.85rem' }}>No birthdays today. Rest day for the automation bot! 🤖</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {todayBirthdays.map(b => {
-                        const dateKey = new Date().toISOString().split('T')[0];
-                        const isAutoWished = wishedAlumni?.[dateKey]?.includes(b.id);
-                        return (
-                          <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: isAutoWished ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' : '#f8fafc', border: '1px solid', borderColor: isAutoWished ? '#bbf7d0' : 'var(--border)', borderRadius: '12px' }}>
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: isAutoWished ? '#22c55e' : 'var(--blue-100)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '0.85rem' }}>
-                                  {isAutoWished ? '✓' : b.name[0]}
-                                </div>
-                                <div>
-                                  <div style={{ fontWeight: '700', fontSize: '0.95rem', color: 'var(--text-main)' }}>{b.name}</div>
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Batch of {b.batch} · {b.profession} at {b.company}</div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              {isAutoWished ? (
-                                <span style={{ background: '#dcfce7', color: '#15803d', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '700', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                  <CheckCircle size={12} /> Auto-Wished
-                                </span>
-                              ) : (
-                                <span style={{ background: '#fef3c7', color: '#d97706', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '700', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                  <Clock size={12} /> Pending Auto-Send
-                                </span>
-                              )}
-                              
-                              <button 
-                                className="btn btn-sm" 
-                                style={{ background: '#fff', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '0.35rem 0.6rem', height: 'auto' }}
-                                title="Send Email Manually"
-                                onClick={() => {
-                                  const subject = encodeURIComponent(`Happy Birthday, ${b.name}! 🎂`);
-                                  const body = encodeURIComponent(
-                                    `Dear ${b.name},\n\n` +
-                                    `On behalf of the Commerce Alumni Association, we wish you a fantastic and very Happy Birthday! 🎂✨\n\n` +
-                                    `Best regards,\n` +
-                                    `Commerce Alumni Connect Team`
-                                  );
-                                  window.open(`mailto:${b.email}?subject=${subject}&body=${body}`, '_blank');
-                                }}
-                              >
-                                <Mail size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Automation Log Timeline */}
-                <div className="card" style={{ padding: '2rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      📋 Automation Wish History
-                    </h4>
-                    {birthdayLogs?.length > 0 && (
-                      <button 
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to clear the automation history logs?")) {
-                            setBirthdayLogs([]);
-                            localStorage.removeItem('ac_birthday_logs');
-                          }
-                        }}
-                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                      >
-                        <Trash2 size={12} /> Clear Logs
-                      </button>
-                    )}
+                {todayBirthdays.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)', background: 'var(--gray-50)', borderRadius: '12px' }}>
+                    <Cake size={32} style={{ marginBottom: '0.5rem', color: 'var(--text-dim)' }} />
+                    <p style={{ fontSize: '0.85rem' }}>No birthdays today. Rest day for the automation bot! 🤖</p>
                   </div>
-
-                  {birthdayLogs?.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)', background: 'var(--gray-50)', borderRadius: '12px', fontSize: '0.85rem' }}>
-                      No automated wishes sent yet. History logs will appear here.
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '380px', overflowY: 'auto', paddingRight: '0.25rem' }}>
-                      {birthdayLogs?.map((log) => (
-                        <div key={log.id} style={{ padding: '1rem', background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.8rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                            <span style={{ fontWeight: '700', color: 'var(--blue-900)' }}>🎉 {log.alumniName}</span>
-                            <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>{new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} ({new Date(log.timestamp).toLocaleDateString('en-IN')})</span>
-                          </div>
-                          <div style={{ color: 'var(--text-muted)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
-                            Automatically wished via: 
-                            <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
-                              {log.channels?.map(ch => (
-                                <span key={ch} className="tag" style={{ background: ch === 'Email' ? '#eff6ff' : '#ecfdf5', color: ch === 'Email' ? 'var(--blue-700)' : '#059669', border: ch === 'Email' ? '1px solid #bfdbfe' : '1px solid #a7f3d0', fontSize: '0.65rem' }}>{ch}</span>
-                              ))}
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {todayBirthdays.map(b => {
+                      const dateKey = new Date().toISOString().split('T')[0];
+                      const isAutoWished = wishedAlumni?.[dateKey]?.includes(b.id);
+                      return (
+                        <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: isAutoWished ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' : '#f8fafc', border: '1px solid', borderColor: isAutoWished ? '#bbf7d0' : 'var(--border)', borderRadius: '12px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <div style={{ width: 32, height: 32, borderRadius: '50%', background: isAutoWished ? '#22c55e' : 'var(--blue-100)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '0.85rem' }}>
+                                {isAutoWished ? '✓' : b.name[0]}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: '700', fontSize: '0.95rem', color: 'var(--text-main)' }}>{b.name}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Batch of {b.batch} · {b.profession} at {b.company}</div>
+                              </div>
                             </div>
                           </div>
                           
-                          {/* Expander detail */}
-                          <details style={{ marginTop: '0.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.5rem' }}>
-                            <summary style={{ cursor: 'pointer', fontSize: '0.7rem', color: 'var(--blue-600)', fontWeight: '700', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                              🔍 View Sent Message Preview
-                            </summary>
-                            <div style={{ marginTop: '0.5rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-main)' }}>
-                              <strong>Email Subject:</strong> {log.emailSubject}<br/><br/>
-                              <strong>Email Content:</strong>
-                              <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: '0.25rem 0 0.5rem 0', color: 'var(--text-muted)' }}>{log.emailBody}</pre>
-                              <strong>WhatsApp:</strong>
-                              <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: '0.25rem 0 0 0', color: 'var(--text-muted)', background: '#f0fdf4', padding: '0.5rem', borderRadius: '6px' }}>{log.whatsappText}</pre>
-                            </div>
-                          </details>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {isAutoWished ? (
+                              <span style={{ background: '#dcfce7', color: '#15803d', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '700', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <CheckCircle size={12} /> Auto-Wished
+                              </span>
+                            ) : (
+                              <span style={{ background: '#fef3c7', color: '#d97706', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '700', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <Clock size={12} /> Pending Auto-Send
+                              </span>
+                            )}
+                            
+                            <button 
+                              className="btn btn-sm" 
+                              style={{ background: '#fff', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '0.35rem 0.6rem', height: 'auto' }}
+                              title="Send Email Manually"
+                              onClick={() => {
+                                const subject = encodeURIComponent(`Happy Birthday, ${b.name}! 🎂`);
+                                const body = encodeURIComponent(
+                                  `Dear ${b.name},\n\n` +
+                                  `On behalf of the Commerce Alumni Association, we wish you a fantastic and very Happy Birthday! 🎂✨\n\n` +
+                                  `Best regards,\n` +
+                                  `Commerce Alumni Connect Team`
+                                );
+                                window.open(`mailto:${b.email}?subject=${subject}&body=${body}`, '_blank');
+                              }}
+                            >
+                              <Mail size={12} />
+                            </button>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-
-              {/* Right Column: Settings & Templates */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              {/* Automation settings toggle card */}
+              <div className="card" style={{ padding: '2rem', height: '100%' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  ⚙️ Automation Controls
+                </h4>
                 
-                {/* Automation settings toggle card */}
-                <div className="card" style={{ padding: '2rem' }}>
-                  <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    ⚙️ Automation Controls
-                  </h4>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--gray-50)', borderRadius: '12px', marginBottom: '1.25rem' }}>
-                    <div>
-                      <div style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-main)' }}>Enable Scheduler Bot</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sends greetings daily at 9:00 AM</div>
-                    </div>
-                    <button 
-                      onClick={handleToggleAutomation}
-                      style={{ 
-                        border: 'none', 
-                        background: 'none', 
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
-                    >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--gray-50)', borderRadius: '12px', marginBottom: '1.25rem' }}>
+                  <div>
+                    <div style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-main)' }}>Enable Scheduler Bot</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sends greetings daily at 9:00 AM</div>
+                  </div>
+                  <button 
+                    onClick={handleToggleAutomation}
+                    style={{ 
+                      border: 'none', 
+                      background: 'none', 
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div style={{ 
+                      width: '48px', 
+                      height: '26px', 
+                      borderRadius: '99px', 
+                      background: automationSettings?.enabled ? 'var(--blue-700)' : '#d1d5db',
+                      position: 'relative',
+                      transition: 'background 0.3s ease',
+                      padding: '3px'
+                    }}>
                       <div style={{ 
-                        width: '48px', 
-                        height: '26px', 
-                        borderRadius: '99px', 
-                        background: automationSettings?.enabled ? 'var(--blue-700)' : '#d1d5db',
-                        position: 'relative',
-                        transition: 'background 0.3s ease',
-                        padding: '3px'
-                      }}>
-                        <div style={{ 
-                          width: '20px', 
-                          height: '20px', 
-                          borderRadius: '50%', 
-                          background: '#fff',
-                          position: 'absolute',
-                          left: automationSettings?.enabled ? '25px' : '3px',
-                          transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }} />
-                      </div>
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-main)' }}>Delivery Channels</div>
-                    
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', cursor: 'pointer', padding: '0.5rem 0.25rem' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={automationSettings?.sendEmail || false} 
-                        onChange={() => handleChannelToggle('sendEmail')}
-                        style={{ width: '16px', height: '16px' }}
-                      />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <Mail size={14} style={{ color: 'var(--blue-600)' }} />
-                        <span>Email Notification Channel</span>
-                      </div>
-                    </label>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', cursor: 'pointer', padding: '0.5rem 0.25rem' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={automationSettings?.sendWhatsapp || false} 
-                        onChange={() => handleChannelToggle('sendWhatsapp')}
-                        style={{ width: '16px', height: '16px' }}
-                      />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <Phone size={14} style={{ color: '#22c55e' }} />
-                        <span>WhatsApp API Integration</span>
-                      </div>
-                    </label>
-                  </div>
+                        width: '20px', 
+                        height: '20px', 
+                        borderRadius: '50%', 
+                        background: '#fff',
+                        position: 'absolute',
+                        left: automationSettings?.enabled ? '25px' : '3px',
+                        transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }} />
+                    </div>
+                  </button>
                 </div>
 
-                {/* Templates editor card */}
-                <div className="card" style={{ padding: '2rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0 }}>
-                      📝 Greeting Templates
-                    </h4>
-                    <button 
-                      onClick={handleResetTemplates}
-                      style={{ background: 'none', border: 'none', color: 'var(--blue-600)', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                    >
-                      Reset to Default
-                    </button>
-                  </div>
-
-                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '0.75rem', marginBottom: '1.25rem', fontSize: '0.75rem', color: 'var(--blue-800)', lineHeight: '1.4' }}>
-                    💡 Use placeholders to personalize: <strong>{`{name}`}</strong>, <strong>{`{profession}`}</strong>, <strong>{`{company}`}</strong>, <strong>{`{batch}`}</strong>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    {/* Email template */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem' }}>Email Subject</label>
-                      <input 
-                        type="text" 
-                        value={automationSettings?.emailSubject || ''} 
-                        onChange={e => handleTemplateChange('emailSubject', e.target.value)}
-                        style={{ padding: '0.65rem 0.75rem', width: '100%', border: '1px solid var(--border)', borderRadius: '10px' }}
-                      />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-main)' }}>Delivery Channels</div>
+                  
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', cursor: 'pointer', padding: '0.5rem 0.25rem' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={automationSettings?.sendEmail || false} 
+                      onChange={() => handleChannelToggle('sendEmail')}
+                      style={{ width: '16px', height: '16px' }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Mail size={14} style={{ color: 'var(--blue-600)' }} />
+                      <span>Email Notification Channel</span>
                     </div>
+                  </label>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem' }}>Email Body</label>
-                      <textarea 
-                        rows="4" 
-                        value={automationSettings?.emailBody || ''} 
-                        onChange={e => handleTemplateChange('emailBody', e.target.value)}
-                        style={{ padding: '0.65rem 0.75rem', width: '100%', resize: 'none', fontSize: '0.8rem', border: '1px solid var(--border)', borderRadius: '10px' }}
-                      />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', cursor: 'pointer', padding: '0.5rem 0.25rem' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={automationSettings?.sendWhatsapp || false} 
+                      onChange={() => handleChannelToggle('sendWhatsapp')}
+                      style={{ width: '16px', height: '16px' }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Phone size={14} style={{ color: '#22c55e' }} />
+                      <span>WhatsApp API Integration</span>
                     </div>
-
-                    {/* WhatsApp template */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem' }}>WhatsApp Template</label>
-                      <textarea 
-                        rows="3" 
-                        value={automationSettings?.whatsappTemplate || ''} 
-                        onChange={e => handleTemplateChange('whatsappTemplate', e.target.value)}
-                        style={{ padding: '0.65rem 0.75rem', width: '100%', resize: 'none', fontSize: '0.8rem', border: '1px solid var(--border)', borderRadius: '10px' }}
-                      />
-                    </div>
-
-                    {/* Live Preview Expander */}
-                    <div style={{ background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                        <Sparkles size={12} style={{ color: '#d97706' }} /> Live Automation Preview
-                      </div>
-                      
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        Previewing for: <strong>{previewAlumnus.name}</strong> (Batch of {previewAlumnus.batch})
-                      </div>
-                      
-                      <div style={{ marginTop: '0.75rem', borderTop: '1px dotted var(--border)', paddingTop: '0.75rem' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>EMAIL SUBJ:</div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>{renderPreview(automationSettings?.emailSubject)}</div>
-                        
-                        <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>EMAIL BODY:</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', background: '#fff', border: '1px solid var(--border)', padding: '0.5rem', borderRadius: '6px', marginBottom: '0.5rem' }}>
-                          {renderPreview(automationSettings?.emailBody)}
-                        </div>
-
-                        <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>WHATSAPP MESSAGE:</div>
-                        <div style={{ fontSize: '0.75rem', color: '#15803d', whiteSpace: 'pre-wrap', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '0.5rem', borderRadius: '6px' }}>
-                          {renderPreview(automationSettings?.whatsappTemplate)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  </label>
                 </div>
-
               </div>
             </div>
+
+            {/* Row 2: template editors + live preview */}
+            <div className="bday-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1.5rem', marginBottom: '1.5rem', alignItems: 'stretch' }}>
+              {/* Templates editor card */}
+              <div className="card" style={{ padding: '2rem', height: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0 }}>
+                    📝 Greeting Templates
+                  </h4>
+                  <button 
+                    onClick={handleResetTemplates}
+                    style={{ background: 'none', border: 'none', color: 'var(--blue-600)', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                  >
+                    Reset to Default
+                  </button>
+                </div>
+
+                <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '0.75rem', marginBottom: '1.25rem', fontSize: '0.75rem', color: 'var(--blue-800)', lineHeight: '1.4' }}>
+                  💡 Use placeholders to personalize: <strong>{`{name}`}</strong>, <strong>{`{profession}`}</strong>, <strong>{`{company}`}</strong>, <strong>{`{batch}`}</strong>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {/* Email template */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem' }}>Email Subject</label>
+                    <input 
+                      type="text" 
+                      value={automationSettings?.emailSubject || ''} 
+                      onChange={e => handleTemplateChange('emailSubject', e.target.value)}
+                      style={{ padding: '0.65rem 0.75rem', width: '100%', border: '1px solid var(--border)', borderRadius: '10px' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem' }}>Email Body</label>
+                    <textarea 
+                      rows="6" 
+                      value={automationSettings?.emailBody || ''} 
+                      onChange={e => handleTemplateChange('emailBody', e.target.value)}
+                      style={{ padding: '0.65rem 0.75rem', width: '100%', resize: 'none', fontSize: '0.8rem', border: '1px solid var(--border)', borderRadius: '10px' }}
+                    />
+                  </div>
+
+                  {/* WhatsApp template */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem' }}>WhatsApp Template</label>
+                    <textarea 
+                      rows="4" 
+                      value={automationSettings?.whatsappTemplate || ''} 
+                      onChange={e => handleTemplateChange('whatsappTemplate', e.target.value)}
+                      style={{ padding: '0.65rem 0.75rem', width: '100%', resize: 'none', fontSize: '0.8rem', border: '1px solid var(--border)', borderRadius: '10px' }}
+                    />
+                  </div>
+
+                </div>
+              </div>
+              <div className="card" style={{ padding: '2rem', height: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                  <Sparkles size={16} style={{ color: '#d97706' }} /> Live Automation Preview
+                </div>
+                
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  Previewing for: <strong>{previewAlumnus.name}</strong> (Batch of {previewAlumnus.batch})
+                </div>
+                
+                <div style={{ marginTop: '0.75rem', borderTop: '1px dotted var(--border)', paddingTop: '0.75rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>EMAIL SUBJ:</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>{renderPreview(automationSettings?.emailSubject)}</div>
+                  
+                  <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>EMAIL BODY:</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', background: '#fff', border: '1px solid var(--border)', padding: '0.5rem', borderRadius: '6px', marginBottom: '0.5rem' }}>
+                    {renderPreview(automationSettings?.emailBody)}
+                  </div>
+
+                  <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>WHATSAPP MESSAGE:</div>
+                  <div style={{ fontSize: '0.75rem', color: '#15803d', whiteSpace: 'pre-wrap', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '0.5rem', borderRadius: '6px' }}>
+                    {renderPreview(automationSettings?.whatsappTemplate)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 3: wish history, full width */}
+              {/* Automation Log Timeline */}
+              <div className="card" style={{ padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    📋 Automation Wish History
+                  </h4>
+                  {birthdayLogs?.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to clear the automation history logs?")) {
+                          setBirthdayLogs([]);
+                          localStorage.removeItem('ac_birthday_logs');
+                        }
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                    >
+                      <Trash2 size={12} /> Clear Logs
+                    </button>
+                  )}
+                </div>
+
+                {birthdayLogs?.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)', background: 'var(--gray-50)', borderRadius: '12px', fontSize: '0.85rem' }}>
+                    No automated wishes sent yet. History logs will appear here.
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '0.75rem', alignItems: 'start', maxHeight: '420px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                    {birthdayLogs?.map((log) => (
+                      <div key={log.id} style={{ padding: '1rem', background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.8rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <span style={{ fontWeight: '700', color: 'var(--blue-900)' }}>🎉 {log.alumniName}</span>
+                          <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>{new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} ({new Date(log.timestamp).toLocaleDateString('en-IN')})</span>
+                        </div>
+                        <div style={{ color: 'var(--text-muted)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                          Automatically wished via: 
+                          <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
+                            {log.channels?.map(ch => (
+                              <span key={ch} className="tag" style={{ background: ch === 'Email' ? '#eff6ff' : '#ecfdf5', color: ch === 'Email' ? 'var(--blue-700)' : '#059669', border: ch === 'Email' ? '1px solid #bfdbfe' : '1px solid #a7f3d0', fontSize: '0.65rem' }}>{ch}</span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Expander detail */}
+                        <details style={{ marginTop: '0.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.5rem' }}>
+                          <summary style={{ cursor: 'pointer', fontSize: '0.7rem', color: 'var(--blue-600)', fontWeight: '700', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            🔍 View Sent Message Preview
+                          </summary>
+                          <div style={{ marginTop: '0.5rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-main)' }}>
+                            <strong>Email Subject:</strong> {log.emailSubject}<br/><br/>
+                            <strong>Email Content:</strong>
+                            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: '0.25rem 0 0.5rem 0', color: 'var(--text-muted)' }}>{log.emailBody}</pre>
+                            <strong>WhatsApp:</strong>
+                            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: '0.25rem 0 0 0', color: 'var(--text-muted)', background: '#f0fdf4', padding: '0.5rem', borderRadius: '6px' }}>{log.whatsappText}</pre>
+                          </div>
+                        </details>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
           </motion.div>
         )}
       </div>
