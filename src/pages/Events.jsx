@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Clock, ArrowRight, Sparkles, Check, CreditCard } from 'lucide-react';
+import { Calendar, MapPin, Clock, ArrowRight, Check, CreditCard } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import useRazorpay from '../hooks/useRazorpay';
@@ -13,14 +14,21 @@ const Events = () => {
   const { user } = useAuth();
   const [toast, setToast] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [when, setWhen] = useState('upcoming');
 
-  const categories = ['All', ...new Set(events.map(e => e.category))];
+  // Split by date so finished events can't be registered for
+  const [today] = useState(() => new Date().toISOString().slice(0, 10));
+  const isPast = (e) => Boolean(e.date) && e.date < today;
+  const upcoming = events.filter(e => !isPast(e)).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const past = events.filter(isPast).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const list = when === 'upcoming' ? upcoming : past;
 
-  const filteredEvents = activeCategory === 'All'
-    ? events
-    : events.filter(e => e.category === activeCategory);
+  const categories = ['All', ...new Set(list.map(e => e.category))];
+  const category = categories.includes(activeCategory) ? activeCategory : 'All';
+  const filteredEvents = category === 'All' ? list : list.filter(e => e.category === category);
 
-  const featuredEvent = events.find(e => e.featured);
+  // Feature the flagged event, or the next one coming up
+  const featuredEvent = when === 'upcoming' && category === 'All' ? (upcoming.find(e => e.featured) || upcoming[0]) : null;
 
   const formatDate = (d) => {
     if (!d) return '';
@@ -65,20 +73,20 @@ const Events = () => {
     event.registrations?.some(r => r.userId === (user?.id || 'guest'));
 
   return (
-    <div style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%)', minHeight: '100vh', paddingBottom: '5rem' }}>
+    <div className="page">
       <style>{`
-        .ev-featured { display: grid; grid-template-columns: 1.2fr 1fr; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 3rem; }
-        .ev-featured-img { width: 100%; height: 100%; min-height: 380px; }
+        .ev-featured { display: grid; grid-template-columns: 1.2fr 1fr; background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-md); border: 1px solid var(--border); margin-bottom: 2.25rem; }
+        .ev-featured-img { width: 100%; height: 100%; min-height: 320px; }
         .ev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 2rem; }
         .ev-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; transition: all 0.35s ease; }
-        .ev-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(37,99,235,0.1); border-color: var(--blue-200); }
+        .ev-card:hover { box-shadow: 0 12px 28px rgba(37,99,235,0.08); border-color: var(--blue-200); }
         .ev-card-img { position: relative; height: 190px; overflow: hidden; }
         .ev-card-img .evc > img, .ev-card-img .evc-art { transition: transform 0.5s ease; }
                 .ev-card:hover .ev-card-img .evc > img, .ev-card:hover .ev-card-img .evc-art { transform: scale(1.05); }
         .date-chip { position: absolute; top: 1rem; left: 1rem; background: white; padding: 0.4rem 0.85rem; border-radius: 10px; font-size: 0.78rem; font-weight: 800; color: var(--blue-700); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .cat-badge { position: absolute; top: 1rem; right: 1rem; background: var(--blue-700); color: white; padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.72rem; font-weight: 700; }
         .ev-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-        .filter-bar { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 2rem; scrollbar-width: none; }
+        .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; scrollbar-width: none; }
         .filter-btn { padding: 0.55rem 1.15rem; border-radius: 99px; border: 1px solid var(--border); background: white; color: var(--text-muted); font-weight: 600; font-size: 0.875rem; white-space: nowrap; cursor: pointer; transition: 0.25s; }
         .filter-btn:hover { border-color: var(--blue-400); color: var(--blue-700); }
         .filter-btn.active { background: var(--blue-700); color: white; border-color: var(--blue-700); box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
@@ -86,6 +94,8 @@ const Events = () => {
         .reg-btn.primary { background: var(--blue-700); color: white; }
         .reg-btn.primary:hover { background: var(--blue-800); }
         .reg-btn.done { background: #f0fdf4; color: #059669; cursor: default; }
+        .reg-btn.ended { background: var(--gray-100); color: var(--text-dim); cursor: default; }
+        .ev-card.is-past .ev-card-img { filter: grayscale(0.6); }
         @media (max-width: 900px) { .ev-featured { grid-template-columns: 1fr; } .ev-featured-img { min-height: 0; aspect-ratio: 16 / 9; } .ev-featured-body { padding: 1.75rem !important; } .ev-featured-body h2 { font-size: 1.5rem !important; } }
         @media (max-width: 400px) { .ev-grid { grid-template-columns: 1fr; } }
       `}</style>
@@ -102,29 +112,24 @@ const Events = () => {
         )}
       </AnimatePresence>
 
-      <div className="container">
-        {/* Header */}
-        <header style={{ padding: '5rem 0 3rem' }}>
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--blue-700)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '1rem' }}>
-              <Sparkles size={15} /> Commerce Events Portal
-            </div>
-            <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-1.5px' }}>
-              Upcoming Events
-            </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', maxWidth: '520px', lineHeight: 1.7 }}>
-              Summits, workshops, reunions, and networking nights — all crafted for the Transcend Commerce alumni network.
-            </p>
-          </motion.div>
-        </header>
-
+      <PageHeader
+        title="Events"
+        subtitle="Summits, workshops, reunions and networking nights for the Transcend Commerce alumni network."
+        actions={(
+          <div className="seg" role="tablist" aria-label="When">
+            <button role="tab" aria-selected={when === 'upcoming'} onClick={() => setWhen('upcoming')}>Upcoming <span className="count">{upcoming.length}</span></button>
+            <button role="tab" aria-selected={when === 'past'} onClick={() => setWhen('past')}>Past <span className="count">{past.length}</span></button>
+          </div>
+        )}
+      />
+      <div>
         {/* Featured Event */}
         {featuredEvent && (
           <motion.div className="ev-featured" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}>
             <EventCover event={featuredEvent} className="ev-featured-img" />
-            <div className="ev-featured-body" style={{ padding: '3rem', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <span className="badge" style={{ alignSelf: 'flex-start', marginBottom: '1.25rem' }}>Featured Event</span>
-              <h2 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '1.25rem', lineHeight: 1.15 }}>{featuredEvent.title}</h2>
+            <div className="ev-featured-body" style={{ padding: '2.5rem', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <span className="badge" style={{ alignSelf: 'flex-start', marginBottom: '1rem' }}>{featuredEvent.featured ? 'Featured event' : 'Coming up next'}</span>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1rem', lineHeight: 1.2 }}>{featuredEvent.title}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   <Calendar size={16} style={{ color: 'var(--blue-500)' }} /> {formatDate(featuredEvent.date)} · {featuredEvent.time}
@@ -165,7 +170,7 @@ const Events = () => {
         {/* Filter Bar */}
         <div className="filter-bar">
           {categories.map(cat => (
-            <button key={cat} className={`filter-btn ${activeCategory === cat ? 'active' : ''}`} onClick={() => setActiveCategory(cat)}>
+            <button key={cat} className={`filter-btn ${category === cat ? 'active' : ''}`} onClick={() => setActiveCategory(cat)}>
               {cat}
             </button>
           ))}
@@ -173,14 +178,10 @@ const Events = () => {
 
         {/* Events Grid */}
         <div className="ev-grid">
-          {filteredEvents.filter(e => !e.featured).map((event, i) => (
-            <motion.div
+          {filteredEvents.filter(e => e !== featuredEvent).map((event) => (
+            <div
               key={event.id}
-              className="ev-card"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.07 }}
+              className={`ev-card ${isPast(event) ? 'is-past' : ''}`}
             >
               <div className="ev-card-img">
                 <EventCover event={event} compact />
@@ -202,7 +203,11 @@ const Events = () => {
                   </div>
                 </div>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.6, flex: 1, marginBottom: '1.5rem' }}>{event.description}</p>
-                {isRegistered(event) ? (
+                {isPast(event) ? (
+                  <div className="reg-btn ended" aria-disabled="true">
+                    {isRegistered(event) ? <><Check size={15} /> You attended · {formatDate(event.date)}</> : <>Ended on {formatDate(event.date)}</>}
+                  </div>
+                ) : isRegistered(event) ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#059669', fontWeight: '700', fontSize: '0.85rem' }}>
                       <Check size={15} /> Registered
@@ -226,13 +231,13 @@ const Events = () => {
                   </button>
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {filteredEvents.length === 0 && (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'var(--text-muted)' }}>
-            No events found in this category.
+            {when === 'upcoming' ? 'No upcoming events yet. Past events are under the Past tab.' : 'No past events in this category.'}
           </div>
         )}
       </div>

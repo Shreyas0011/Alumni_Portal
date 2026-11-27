@@ -2,15 +2,24 @@ import React, { useState } from 'react';
 import BrandLogo from './BrandLogo';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, GraduationCap, Calendar, Menu, X, ShieldCheck, ChevronRight, LogOut, LayoutGrid } from 'lucide-react';
+import { Users, GraduationCap, Calendar, Menu, X, ShieldCheck, ChevronRight, LogOut, LayoutGrid, Briefcase, Landmark, MessageSquare, Rocket, Search, BookImage } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import { useSocial } from '../context/SocialContext';
+import NotificationBell from './NotificationBell';
+import { openSearch } from './SearchPalette';
 import { useAuth } from '../context/AuthContext';
 import { homeFor, canAccess, isAdminRole, ROLE_LABELS } from '../lib/roles';
 
-const Navbar = () => {
+const Navbar = ({ hidden = false }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const loc = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { events } = useData();
+  const { unreadMessages } = useSocial();
+  // Real counts only: upcoming events and unread messages
+  const today = new Date().toISOString().slice(0, 10);
+  const upcomingEvents = events.filter(e => e.date && e.date >= today).length;
 
   const handleLogout = () => {
     logout();
@@ -18,9 +27,14 @@ const Navbar = () => {
   };
 
   const baseLinks = [
-    { name: 'Directory', path: '/directory', icon: <Users size={18} />, badge: 'New' },
+    { name: 'Messages', path: '/messages', icon: <MessageSquare size={18} />, badge: unreadMessages || null },
+    { name: 'Directory', path: '/directory', icon: <Users size={18} /> },
+    { name: 'Yearbook', path: '/yearbook', icon: <BookImage size={18} /> },
     { name: 'Mentorship', path: '/mentorship', icon: <GraduationCap size={18} /> },
-    { name: 'Events', path: '/events', icon: <Calendar size={18} />, badge: '3' },
+    { name: 'Events', path: '/events', icon: <Calendar size={18} />, badge: upcomingEvents || null },
+    { name: 'Jobs & Referrals', path: '/jobs', icon: <Briefcase size={18} /> },
+    { name: 'Career Hub', path: '/career', icon: <Rocket size={18} /> },
+    { name: 'Explore Campus', path: '/campus', icon: <Landmark size={18} /> },
   ];
 
   // Only the pages this role may open (RBAC, see src/lib/roles.js)
@@ -44,7 +58,9 @@ const Navbar = () => {
       {/* ── SIDEBAR ── */}
       <motion.aside className="sidebar"
         initial={{ x: -260, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
+        animate={{ x: hidden ? -270 : 0, opacity: hidden ? 0 : 1 }}
+        aria-hidden={hidden}
+        inert={hidden}
         transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
       >
         {/* Brand */}
@@ -132,9 +148,13 @@ const Navbar = () => {
           <BrandLogo width={118} />
           <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--blue-900)' }}>Alumni Connect</span>
         </Link>
-        <button className="mobile-toggle" onClick={() => setMobileOpen(o => !o)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+        {user && <button className="btn-icon btn-ghost" onClick={() => openSearch()} aria-label="Search"><Search size={19} /></button>}
+        {user && <NotificationBell />}
+        <button className="mobile-toggle" onClick={() => setMobileOpen(o => !o)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'}>
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
+        </div>
       </div>
 
       {/* ── MOBILE MENU ── */}

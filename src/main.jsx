@@ -14,13 +14,16 @@ import './index.css'
 
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
+import { SocialProvider } from './context/SocialContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <DataProvider>
-          <App />
+          <SocialProvider>
+            <App />
+          </SocialProvider>
         </DataProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -7,6 +7,7 @@ import { connectDB, disconnectDB } from './db.js';
 import { seedIfEmpty, migrateData } from './seed.js';
 import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
+import socialRoutes from './routes/social.js';
 
 dotenv.config({ path: fileURLToPath(new URL('./.env', import.meta.url)) });
 
@@ -21,6 +22,7 @@ app.get('/api/health', (_req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
+app.use('/api/social', socialRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error('[api]', err);
