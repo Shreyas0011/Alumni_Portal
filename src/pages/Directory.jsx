@@ -1,109 +1,75 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Globe, MessageSquare, ChevronDown, MapPin, Briefcase, GraduationCap, X, UserPlus, Check, Send, Sparkles, Smile, Paperclip, Loader2 } from 'lucide-react';
+import { Search, Filter, Globe, MessageSquare, MapPin, Briefcase, GraduationCap, X, UserPlus, Check, Send, Loader2 } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
+import { useSocial } from '../context/SocialContext';
+import { ChatDrawer } from '../components/Chat';
+import { VerifiedBadge } from '../components/Badges';
+import { useSearchParams } from 'react-router-dom';
+import { CREDENTIALS, AVAILABILITY } from '../data/showcase';
+import { buildDirectory } from '../data/directoryData';
+import PageHeader from '../components/PageHeader';
 
-// Procedurally generate 10,000 commerce-specific profiles for testing scalability
-const generateAlumniDataset = () => {
-  const names = ['Sarah', 'David', 'Marcus', 'Elena', 'James', 'Priya', 'Amit', 'Ananya', 'Rohan', 'Sneha', 'Vikram', 'Meera', 'Arjun', 'Neha', 'Kabir', 'Tanvi'];
-  const lastNames = ['Jenkins', 'Chen', 'Thorne', 'Rodriguez', 'Wilson', 'Sharma', 'Patel', 'Goel', 'Mehta', 'Reddy', 'Singh', 'Desai', 'Kapoor', 'Gupta', 'Iyer', 'Joshi'];
-  const roles = ['Senior M&A Associate', 'Partner', 'Financial Analyst', 'Chief Financial Officer', 'Senior Tax Consultant', 'Investment Analyst', 'Equity Research VP', 'Treasury Manager', 'Portfolio Analyst', 'Auditor', 'Chartered Accountant'];
-  const companies = ['Goldman Sachs', 'Deloitte', 'JP Morgan Chase', 'Unilever', 'EY', 'Blackstone Group', 'PwC', 'KPMG', 'Morgan Stanley', 'Citi Group', 'HDFC Bank', 'HSBC'];
-  const depts = ['Investment Banking', 'Audit & Assurance', 'Corporate Finance', 'Executive Management', 'Taxation', 'Wealth Management', 'Treasury Operations', 'Risk Advisory'];
-  const locations = ['London, UK', 'Singapore', 'Mumbai, India', 'New York, NY', 'Toronto, Canada', 'Bangalore, India', 'Sydney, Australia', 'Dubai, UAE', 'Tokyo, Japan'];
-
-  const dataset = [];
-  
-  // Seed the original 6 profiles first
-  const baseAlumni = [
-    { id: 1, name: 'Sarah Jenkins', role: 'Senior M&A Associate', company: 'Goldman Sachs', initials: 'SJ', dept: 'Investment Banking', location: 'London, UK', batch: '2018' },
-    { id: 2, name: 'David Chen, CA', role: 'Partner', company: 'Deloitte', initials: 'DC', dept: 'Audit & Assurance', location: 'Singapore', batch: '2020' },
-    { id: 3, name: 'Marcus Thorne', role: 'Financial Analyst', company: 'JP Morgan Chase', initials: 'MT', dept: 'Corporate Finance', location: 'Mumbai, India', batch: '2019' },
-    { id: 4, name: 'Elena Rodriguez', role: 'Chief Financial Officer', company: 'Unilever', initials: 'ER', dept: 'Executive Management', location: 'New York, NY', batch: '2015' },
-    { id: 5, name: 'James Wilson, CA', role: 'Senior Tax Consultant', company: 'EY', initials: 'JW', dept: 'Taxation', location: 'Toronto, Canada', batch: '2017' },
-    { id: 6, name: 'Priya Sharma, CFA', role: 'Investment Analyst', company: 'Blackstone Group', initials: 'PS', dept: 'Wealth Management', location: 'Mumbai, India', batch: '2018' },
-  ];
-  
-  dataset.push(...baseAlumni);
-  
-  // Fill up to 10,000
-  for (let i = 7; i <= 10000; i++) {
-    const nameIndex = (i * 3) % names.length;
-    const lastNameIndex = (i * 7) % lastNames.length;
-    const roleIndex = (i * 11) % roles.length;
-    const companyIndex = (i * 13) % companies.length;
-    const deptIndex = (i * 17) % depts.length;
-    const locationIndex = (i * 19) % locations.length;
-    const batch = 2000 + (i % 26);
-    
-    const fullName = `${names[nameIndex]} ${lastNames[lastNameIndex]}`;
-    const initials = names[nameIndex][0] + lastNames[lastNameIndex][0];
-    
-    dataset.push({
-      id: i,
-      name: fullName,
-      role: roles[roleIndex],
-      company: companies[companyIndex],
-      initials: initials,
-      dept: depts[deptIndex],
-      location: locations[locationIndex],
-      batch: batch.toString()
-    });
-  }
-  return dataset;
+const AVAIL_STYLE = {
+  'Open to Mentor': ['#ecfdf5', '#047857'],
+  'Giving Referrals': ['#eff6ff', '#1d4ed8'],
+  Hiring: ['#f5f3ff', '#6d28d9'],
+  'Open to Talk': ['#fff7ed', '#c2410c'],
+  Busy: ['#f1f5f9', '#64748b'],
 };
+
+// The yearbook has its own page in the sidebar (/yearbook)
+const SECTIONS = [
+  { id: 'all', label: 'Alumni Directory' },
+  { id: 'batchmates', label: 'Batchmates' },
+];
 
 const Directory = () => {
   const { alumniList } = useData();
+  const { user } = useAuth();
+  const sections = user?.role === 'student' ? SECTIONS.filter(s => s.id === 'all') : SECTIONS;
+  const [section, setSection] = useState('all');
+  const [myBatch, setMyBatch] = useState(String(user?.batch || '2018'));
   const [selectedAlumni, setSelectedAlumni] = useState(null);
   const [connections, setConnections] = useState({});
   const [showChat, setShowChat] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [params] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(params.get('q') || '');
   const [toast, setToast] = useState(null);
 
   // Filter selection states
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
+  const [selectedIndustry, setSelectedIndustry] = useState('');
+  const [selectedDomain, setSelectedDomain] = useState('');
+  const [selectedCredential, setSelectedCredential] = useState('');
+  const [selectedAvailability, setSelectedAvailability] = useState('');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [chatPerson, setChatPerson] = useState(null);
+  const { personById } = useSocial();
+  const openRealChat = (a) => setChatPerson(personById(a.uid) || { uid: a.uid, name: a.name, subtitle: `${a.role} · ${a.company}`, verified: true });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Generate dataset once and prepend global alumniList database
-  const allAlumni = useMemo(() => {
-    const generated = generateAlumniDataset();
-    const mappedGlobal = alumniList.map((a) => ({
-      id: `global-${a.id}`,
-      name: a.name,
-      role: a.profession || (a.role === 'student' ? 'Undergraduate Student' : 'Alumnus'),
-      company: a.company || (a.role === 'student' ? 'Transcend College' : 'Business'),
-      initials: a.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-      dept: a.degree || a.fieldOfStudy || (a.role === 'student' ? 'Student' : 'Business'),
-      location: a.location || 'Mumbai, India',
-      batch: a.batch || '2024',
-      isGlobal: true,
-      email: a.email,
-      skills: a.skills,
-      bio: a.bio,
-      linkedin: a.linkedin,
-      college: a.college,
-      degree: a.degree,
-      fieldOfStudy: a.fieldOfStudy
-    }));
-    return [...mappedGlobal, ...generated];
-  }, [alumniList]);
+  const allAlumni = useMemo(() => buildDirectory(alumniList), [alumniList]);
 
   // Compute unique filters dynamically
   const uniqueDepts = useMemo(() => [...new Set(allAlumni.map(a => a.dept))].sort(), [allAlumni]);
   const uniqueLocations = useMemo(() => [...new Set(allAlumni.map(a => a.location))].sort(), [allAlumni]);
   const uniqueBatches = useMemo(() => [...new Set(allAlumni.map(a => a.batch))].sort((a, b) => b - a), [allAlumni]);
+  const uniqueIndustries = useMemo(() => [...new Set(allAlumni.map(a => a.industry))].sort(), [allAlumni]);
+  const uniqueDomains = useMemo(() => [...new Set(allAlumni.map(a => a.domain))].sort(), [allAlumni]);
+  const batchFilter = section === 'batchmates' ? myBatch : selectedBatch;
 
   // Handle resets on filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedDept, selectedLocation, selectedBatch]);
+  }, [searchQuery, selectedDept, selectedLocation, selectedBatch, selectedIndustry, selectedDomain, selectedCredential, selectedAvailability, verifiedOnly, section, myBatch]);
 
   // Dynamic filter logic
   const filteredAlumni = useMemo(() => {
@@ -116,11 +82,16 @@ const Directory = () => {
         
       const matchesDept = !selectedDept || a.dept === selectedDept;
       const matchesLocation = !selectedLocation || a.location === selectedLocation;
-      const matchesBatch = !selectedBatch || a.batch === selectedBatch;
+      const matchesBatch = !batchFilter || a.batch === batchFilter;
+      const matchesFacets = (!selectedIndustry || a.industry === selectedIndustry)
+        && (!selectedDomain || a.domain === selectedDomain)
+        && (!selectedCredential || a.credentials.includes(selectedCredential))
+        && (!selectedAvailability || a.availability === selectedAvailability)
+        && (!verifiedOnly || a.verified);
       
-      return matchesSearch && matchesDept && matchesLocation && matchesBatch;
+      return matchesSearch && matchesDept && matchesLocation && matchesBatch && matchesFacets;
     });
-  }, [allAlumni, searchQuery, selectedDept, selectedLocation, selectedBatch]);
+  }, [allAlumni, searchQuery, selectedDept, selectedLocation, batchFilter, selectedIndustry, selectedDomain, selectedCredential, selectedAvailability, verifiedOnly]);
 
   // Paginated subset
   const totalPages = Math.ceil(filteredAlumni.length / itemsPerPage);
@@ -161,8 +132,8 @@ const Directory = () => {
   };
 
   return (
-    <div className="directory-page" style={{ background: '#fdfdfd', minHeight: '100vh', padding: 'clamp(1.5rem, 4vw, 2.5rem) 0 3rem' }}>
-      <div className="container" style={{ maxWidth: '1280px' }}>
+    <div className="directory-page page">
+      <div>
         
         {/* Toast Notification */}
         <AnimatePresence>
@@ -180,34 +151,30 @@ const Directory = () => {
           )}
         </AnimatePresence>
 
-        {/* Immersive Header */}
-        <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="hero-badge" style={{ marginBottom: '1rem' }}>
-              <Sparkles size={14} style={{ marginRight: '8px' }} />
-              Global Professional Registry ({allAlumni.length} Profiles)
+        <PageHeader
+          title="Directory"
+          subtitle={`${allAlumni.length.toLocaleString('en-IN')} alumni profiles. Verified alumni can be messaged directly.`}
+          actions={sections.length > 1 && (
+            <div className="seg" role="tablist" aria-label="Directory view">
+              {sections.map(sec => (
+                <button key={sec.id} role="tab" aria-selected={section === sec.id} onClick={() => setSection(sec.id)}>{sec.label}</button>
+              ))}
             </div>
-            <h1 style={{ fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)', fontWeight: 900, marginBottom: '1.25rem', letterSpacing: '-2px' }}>
-              Discover the <span className="text-gradient">Network.</span>
-            </h1>
-            
-            <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative' }}>
-              <div className="glass-premium" style={{ display: 'flex', alignItems: 'center', padding: '1rem 1.75rem', borderRadius: 'var(--radius-2xl)', gap: '1rem' }}>
-                <Search size={22} className="text-primary" />
-                <input 
-                  type="text" 
-                  placeholder="Search by name, expertise, or company..." 
-                  style={{ background: 'transparent', border: 'none', fontSize: '1.05rem', width: '100%', outline: 'none', padding: 0 }}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+          )}
+        >
+          <div className="toolbar" style={{ marginBottom: 0 }}>
+            <div className="grow">
+              <Search size={17} aria-hidden="true" />
+              <input
+                type="text"
+                placeholder="Search by name, role, company or department"
+                aria-label="Search the directory"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          </motion.div>
-        </header>
+          </div>
+        </PageHeader>
 
         <div className="directory-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: '2rem', alignItems: 'start' }}>
           
@@ -219,48 +186,35 @@ const Directory = () => {
                 Filters
               </h3>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-                {/* Department Filter */}
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Department</label>
-                  <select 
-                    value={selectedDept} 
-                    onChange={(e) => setSelectedDept(e.target.value)}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--border)', background: '#fff', fontSize: '0.9rem' }}
-                  >
-                    <option value="">All Departments</option>
-                    {uniqueDepts.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                </div>
-
-                {/* Location Filter */}
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Location</label>
-                  <select 
-                    value={selectedLocation} 
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--border)', background: '#fff', fontSize: '0.9rem' }}
-                  >
-                    <option value="">All Locations</option>
-                    {uniqueLocations.map(l => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                </div>
-
-                {/* Batch Filter */}
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Batch Year</label>
-                  <select 
-                    value={selectedBatch} 
-                    onChange={(e) => setSelectedBatch(e.target.value)}
-                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--border)', background: '#fff', fontSize: '0.9rem' }}
-                  >
-                    <option value="">All Batches</option>
-                    {uniqueBatches.map(b => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={verifiedOnly} onChange={(e) => setVerifiedOnly(e.target.checked)} style={{ width: 'auto' }} />
+                  <VerifiedBadge size={15} /> Verified alumni only
+                </label>
+                {[
+                  { label: 'Department', value: selectedDept, set: setSelectedDept, all: 'All Departments', options: uniqueDepts },
+                  { label: 'Industry', value: selectedIndustry, set: setSelectedIndustry, all: 'All Industries', options: uniqueIndustries },
+                  { label: 'Domain', value: selectedDomain, set: setSelectedDomain, all: 'All Domains', options: uniqueDomains },
+                  { label: 'Professional Credentials', value: selectedCredential, set: setSelectedCredential, all: 'Any Credential', options: CREDENTIALS },
+                  { label: 'Availability', value: selectedAvailability, set: setSelectedAvailability, all: 'Any Availability', options: AVAILABILITY },
+                  { label: 'Location', value: selectedLocation, set: setSelectedLocation, all: 'All Locations', options: uniqueLocations },
+                  ...(section === 'batchmates' ? [] : [{ label: 'Batch Year', value: selectedBatch, set: setSelectedBatch, all: 'All Batches', options: uniqueBatches }]),
+                ].map(f => (
+                  <div key={f.label}>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>{f.label}</label>
+                    <select
+                      value={f.value}
+                      onChange={(e) => f.set(e.target.value)}
+                      style={{ width: '100%', padding: '0.65rem 0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: '#fff', fontSize: '0.88rem' }}
+                    >
+                      <option value="">{f.all}</option>
+                      {f.options.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </div>
+                ))}
               </div>
 
-              {(selectedDept || selectedLocation || selectedBatch) && (
+              {(verifiedOnly || selectedDept || selectedLocation || selectedBatch || selectedIndustry || selectedDomain || selectedCredential || selectedAvailability) && (
                 <button 
                   className="btn btn-outline" 
                   style={{ width: '100%', padding: '0.75rem', marginTop: '1.5rem', color: '#dc2626', borderColor: '#fca5a5', cursor: 'pointer' }}
@@ -268,6 +222,11 @@ const Directory = () => {
                     setSelectedDept('');
                     setSelectedLocation('');
                     setSelectedBatch('');
+                    setSelectedIndustry('');
+                    setSelectedDomain('');
+                    setSelectedCredential('');
+                    setSelectedAvailability('');
+                    setVerifiedOnly(false);
                   }}
                 >
                   Clear Filters
@@ -278,13 +237,24 @@ const Directory = () => {
 
           {/* Clean Alumni Grid */}
           <main style={{ order: 1, minWidth: 0 }}>
+            {section === 'batchmates' && (
+              <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', padding: '1rem 1.25rem', background: 'var(--blue-50)', borderColor: 'var(--blue-100)' }}>
+                <div>
+                  <div style={{ fontWeight: 800 }}>Your batchmates · Class of {myBatch}</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{filteredAlumni.length.toLocaleString('en-IN')} classmates on the portal</div>
+                </div>
+                <select value={myBatch} onChange={(e) => setMyBatch(e.target.value)} aria-label="Batch year" style={{ padding: '0.55rem 0.9rem', borderRadius: '10px', border: '1px solid var(--border)', background: '#fff', fontSize: '0.85rem', width: 'auto' }}>
+                  {uniqueBatches.map(b => <option key={b} value={b}>Class of {b}</option>)}
+                </select>
+              </div>
+            )}
             {paginatedAlumni.length === 0 ? (
               <div className="card" style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-muted)' }}>
                 No matching profiles found!
               </div>
             ) : (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(250px, 100%), 1fr))', gap: '1rem' }}>
                   {paginatedAlumni.map((alumnus, index) => (
                     <motion.div 
                       key={alumnus.id} 
@@ -298,11 +268,11 @@ const Directory = () => {
                       onClick={() => setSelectedAlumni(alumnus)}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                        <div style={{ flexShrink: 0, width: '52px', height: '52px', borderRadius: '16px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 900 }}>
+                        <div style={{ flexShrink: 0, width: '46px', height: '46px', borderRadius: '14px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: 900 }}>
                           {alumnus.initials}
                         </div>
                         <div>
-                          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.2rem' }}>{alumnus.name}</h3>
+                          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '0.15rem', display: 'flex', alignItems: 'center', gap: '0.3rem', lineHeight: 1.25 }}>{alumnus.name}{alumnus.verified && <VerifiedBadge size={16} />}</h3>
                           <p style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '0.85rem' }}>{alumnus.role}</p>
                         </div>
                       </div>
@@ -320,10 +290,22 @@ const Directory = () => {
                           <GraduationCap size={16} style={{ color: 'var(--blue-700)' }} />
                           <span>{alumnus.dept} (Class of {alumnus.batch})</span>
                         </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.2rem' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '0.2rem 0.55rem', borderRadius: '99px', background: AVAIL_STYLE[alumnus.availability][0], color: AVAIL_STYLE[alumnus.availability][1] }}>{alumnus.availability}</span>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 600, padding: '0.2rem 0.55rem', borderRadius: '99px', background: 'var(--gray-100)', color: 'var(--text-muted)' }}>{alumnus.industry} · {alumnus.domain}</span>
+                          {alumnus.credentials.map(c => (
+                            <span key={c} style={{ fontSize: '0.68rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid var(--blue-200)', color: 'var(--blue-800)' }}>{c}</span>
+                          ))}
+                        </div>
                       </div>
 
                       <div style={{ display: 'flex', gap: '1rem' }}>
-                        {connections[alumnus.id] === 'connected' ? (
+                        {alumnus.uid ? (
+                          <button className="btn btn-primary" style={{ flex: 1, padding: '0.75rem' }} onClick={(e) => { e.stopPropagation(); openRealChat(alumnus); }}>
+                            <MessageSquare size={16} />
+                            Message
+                          </button>
+                        ) : connections[alumnus.id] === 'connected' ? (
                           <button className="btn btn-primary" style={{ flex: 1, padding: '0.75rem' }} onClick={() => openChat(alumnus)}>
                             <MessageSquare size={16} />
                             Message
@@ -499,7 +481,12 @@ const Directory = () => {
                 </div>
 
                 <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
-                  {connections[selectedAlumni.id] === 'connected' ? (
+ {selectedAlumni.uid ? (
+                    <button className="btn btn-primary" style={{ flex: 1, padding: '1rem' }} onClick={() => { const a = selectedAlumni; setSelectedAlumni(null); openRealChat(a); }}>
+                      <MessageSquare size={18} />
+                      Message
+                    </button>
+                  ) : connections[selectedAlumni.id] === 'connected' ? (
                     <button 
                       className="btn btn-primary" 
                       style={{ flex: 1, padding: '1rem' }} 
@@ -532,7 +519,9 @@ const Directory = () => {
           )}
         </AnimatePresence>
 
-        {/* Chat Drawer */}
+        <ChatDrawer person={chatPerson} onClose={() => setChatPerson(null)} />
+
+        {/* Sample-profile chat preview (generated test profiles only) */}
         <AnimatePresence>
           {showChat && (
             <>

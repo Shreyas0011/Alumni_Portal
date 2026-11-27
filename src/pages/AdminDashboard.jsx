@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../lib/api';
 import { motion } from 'framer-motion';
 import { Users, FileText, Calendar, Shield, ArrowUpRight, Search, CheckCircle, XCircle, Trophy, MessageSquare, Bell, Send, Cake, Clock, BarChart3, Mail, Phone, Sparkles, Megaphone, Plus, Trash2, Paperclip } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
+import { Flag, Upload } from 'lucide-react';
+import Moderation from '../components/admin/Moderation';
+import BulkImport from '../components/admin/BulkImport';
 
 const chartData = [
   { name: 'Jan', users: 400, posts: 20 }, { name: 'Feb', users: 480, posts: 35 },
@@ -26,6 +30,11 @@ const AdminDashboard = () => {
   } = useData();
 
   const [activeTab, setActiveTab] = useState('overview');
+  const [openReports, setOpenReports] = useState(null);
+  const [weekAgo] = useState(() => Date.now() - 7 * 86400000);
+  useEffect(() => {
+    api.get('/api/social/reports').then(r => setOpenReports(r.filter(x => x.status === 'open').length)).catch(() => {});
+  }, []);
   const [achForm, setAchForm] = useState({ title: '', description: '', category: 'General', date: '' });
   const [bcForm, setBcForm] = useState({ title: '', message: '', priority: 'normal', sendVia: ['email'] });
   const [bcAttachedFile, setBcAttachedFile] = useState(null);
@@ -114,6 +123,8 @@ const AdminDashboard = () => {
     { id: 'achievements', label: 'Achievements', icon: <Trophy size={16} /> },
     { id: 'broadcasts', label: 'Broadcasts', icon: <Megaphone size={16} /> },
     { id: 'birthdays', label: `Birthdays (${todayBirthdays.length})`, icon: <Cake size={16} /> },
+    { id: 'moderation', label: openReports ? `Reports (${openReports})` : 'Reports', icon: <Flag size={16} /> },
+    { id: 'import', label: 'Add to Batch', icon: <Upload size={16} /> },
     { id: 'ai', label: 'AI Insights', icon: <Sparkles size={16} /> },
   ];
 
@@ -127,6 +138,7 @@ const AdminDashboard = () => {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Manage alumni, moderate content, and broadcast updates.</p>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <button className="btn btn-outline" onClick={() => setActiveTab('import')} style={{ padding: '0.65rem 1.25rem' }}><Upload size={16} /> Add to Batch</button>
             <button className="btn btn-primary" onClick={generateAiSummary} style={{ padding: '0.65rem 1.25rem' }}><Sparkles size={16} /> AI Summary</button>
             <button className="btn btn-outline" onClick={handleLogout} style={{ padding: '0.65rem 1.25rem', color: '#ef4444', borderColor: '#ef4444' }}>Sign Out</button>
           </div>
@@ -146,7 +158,7 @@ const AdminDashboard = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
               {[
-                { label: 'Total Alumni', value: alumniList.length, icon: <Users size={20} />, change: '+3 this week' },
+                { label: 'Total Alumni', value: alumniList.length, icon: <Users size={20} />, change: `${alumniList.filter(a => { const t = Date.parse(a.approvedAt || a.importedAt || ''); return t && t > weekAgo; }).length} new this week` },
                 { label: 'Pending Profiles', value: pendingProfilesList.length, icon: <FileText size={20} />, change: 'Need review' },
                 { label: 'Pending Posts', value: pendingPosts.length, icon: <MessageSquare size={20} />, change: 'Moderate' },
                 { label: 'Active Events', value: events.length, icon: <Calendar size={20} />, change: `${events.reduce((s, e) => s + (e.registrations?.length || 0), 0)} registrations` },
@@ -552,6 +564,12 @@ const AdminDashboard = () => {
             </div>
           </motion.div>
         )}
+
+        {/* REPORTED CONTENT */}
+        {activeTab === 'moderation' && <Moderation onCount={setOpenReports} />}
+
+        {/* BULK IMPORT */}
+        {activeTab === 'import' && <BulkImport />}
 
         {/* AI INSIGHTS */}
         {activeTab === 'ai' && (

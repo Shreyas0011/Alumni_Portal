@@ -3,7 +3,8 @@ import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
 import {
   initialAchievements, initialPosts, initialPendingProfiles, initialAlumniList,
-  initialBroadcasts, initialEvents, initialAutomationSettings
+  initialBroadcasts, initialEvents, initialAutomationSettings, initialJobs,
+  initialVolunteering, initialInterviews
 } from '../data/seedData';
 
 const DataContext = createContext();
@@ -71,6 +72,21 @@ export const DataProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : initialEvents;
   });
 
+  const [jobs, setJobs] = useState(() => {
+    const saved = localStorage.getItem('ac_jobs');
+    return saved ? JSON.parse(saved) : initialJobs;
+  });
+
+  const [volunteering, setVolunteering] = useState(() => {
+    const saved = localStorage.getItem('ac_volunteering');
+    return saved ? JSON.parse(saved) : initialVolunteering;
+  });
+
+  const [interviews, setInterviews] = useState(() => {
+    const saved = localStorage.getItem('ac_interviews');
+    return saved ? JSON.parse(saved) : initialInterviews;
+  });
+
   const [notifications, setNotifications] = useState(() => {
     const saved = localStorage.getItem('ac_notifications');
     return saved ? JSON.parse(saved) : [];
@@ -95,18 +111,18 @@ export const DataProvider = ({ children }) => {
   // MongoDB (via /api) is the source of truth. localStorage is only an
   // offline cache so the UI still renders if the API is unreachable.
   const slices = {
-    achievements, posts, pendingProfiles, alumniList, broadcasts, events,
+    achievements, posts, pendingProfiles, alumniList, broadcasts, events, jobs, volunteering, interviews,
     notifications, automationSettings, birthdayLogs, wishedAlumni
   };
   const setters = {
     achievements: setAchievements, posts: setPosts, pendingProfiles: setPendingProfiles,
-    alumniList: setAlumniList, broadcasts: setBroadcasts, events: setEvents,
+    alumniList: setAlumniList, broadcasts: setBroadcasts, events: setEvents, jobs: setJobs, volunteering: setVolunteering, interviews: setInterviews,
     notifications: setNotifications, automationSettings: setAutomationSettings,
     birthdayLogs: setBirthdayLogs, wishedAlumni: setWishedAlumni
   };
   const cacheKeys = {
     achievements: 'ac_achievements', posts: 'ac_posts', pendingProfiles: 'ac_pending_profiles',
-    alumniList: 'ac_alumni_list', broadcasts: 'ac_broadcasts', events: 'ac_events',
+    alumniList: 'ac_alumni_list', broadcasts: 'ac_broadcasts', events: 'ac_events', jobs: 'ac_jobs', volunteering: 'ac_volunteering', interviews: 'ac_interviews',
     notifications: 'ac_notifications', automationSettings: 'ac_birthday_automation_settings',
     birthdayLogs: 'ac_birthday_logs', wishedAlumni: 'ac_wished_alumni'
   };
@@ -114,6 +130,16 @@ export const DataProvider = ({ children }) => {
   const sessionKey = user ? `${user.id}:${user.role}` : null;
   const [dbStatus, setDbStatus] = useState('connecting'); // connecting | online | offline | signed-out
   const lastSynced = useRef({});
+
+  // Replace one collection with the server's copy (after a rejected save,
+  // or after an admin action that changed it on the server)
+  const reloadCollection = (key) => api.get(`/api/data/${key}`)
+    .then((value) => {
+      if (value === undefined || value === null || !setters[key]) return;
+      lastSynced.current[key] = JSON.stringify(value);
+      setters[key](value);
+    })
+    .catch((err) => console.warn(`Could not reload ${key}:`, err.message));
 
   // Load from MongoDB whenever a user signs in (the API only serves signed-in
   // users, and returns what that user's role may see)
@@ -159,12 +185,65 @@ export const DataProvider = ({ children }) => {
         if (lastSynced.current[key] === json) return;
         lastSynced.current[key] = json;
         api.put(`/api/data/${key}`, JSON.parse(json))
-          .catch((err) => console.error(`Failed to save ${key} to MongoDB:`, err.message));
+          .catch((err) => {
+            console.error(`Failed to save ${key} to MongoDB:`, err.message);
+            // Rejected (e.g. someone else changed the list): take the server's copy
+            if (err.status === 403 || err.status === 400) reloadCollection(key);
+          });
       });
     }, 400);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serializedKey, dbStatus]);
+
+  // Jobs & referrals
+  const addJob = (job) => {
+    const newJob = { ...job, id: `job_${Date.now()}`, postedAt: new Date().toISOString(), requests: [] };
+    setJobs(prev => [newJob, ...prev]);
+    return newJob;
+  };
+  const removeJob = (id) => setJobs(prev => prev.filter(j => j.id !== id));
+  const requestReferral = (jobId, request) => {
+    setJobs(prev => prev.map(j => j.id === jobId
+      ? { ...j, requests: [...(j.requests || []).filter(r => r.userId !== request.userId), { ...request, status: 'pending', at: new Date().toISOString() }] }
+      : j));
+  };
+  const withdrawReferral = (jobId, userId) => {
+    setJobs(prev => prev.map(j => j.id === jobId
+      ? { ...j, requests: (j.requests || []).filter(r => r.userId !== userId) }
+      : j));
+  };
+  const setReferralStatus = (jobId, userId, status) => {
+    setJobs(prev => prev.map(j => j.id === jobId
+      ? { ...j, requests: (j.requests || []).map(r => r.userId === userId ? { ...r, status } : r) }
+      : j));
+  };
+
+  // Volunteering requests (faculty post, alumni sign up)
+  const addVolunteerRequest = (req) => {
+    const item = { ...req, id: `vol_${Date.now()}`, postedAt: new Date().toISOString(), signups: [] };
+    setVolunteering(prev => [item, ...prev]);
+    return item;
+  };
+  const removeVolunteerRequest = (id) => setVolunteering(prev => prev.filter(v => v.id !== id));
+  const signUpToVolunteer = (id, entry) => setVolunteering(prev => prev.map(v => v.id === id
+    ? { ...v, signups: [...(v.signups || []).filter(x => x.userId !== entry.userId), { ...entry, status: 'pending', at: new Date().toISOString() }] }
+    : v));
+  const withdrawVolunteer = (id, userId) => setVolunteering(prev => prev.map(v => v.id === id
+    ? { ...v, signups: (v.signups || []).filter(x => x.userId !== userId) } : v));
+  const setVolunteerStatus = (id, userId, status) => setVolunteering(prev => prev.map(v => v.id === id
+    ? { ...v, signups: (v.signups || []).map(x => x.userId === userId ? { ...x, status } : x) } : v));
+
+  // Interview experiences (alumni write, everyone reads)
+  const addInterview = (item) => {
+    const entry = { ...item, id: `int_${Date.now()}`, createdAt: new Date().toISOString(), helpful: [] };
+    setInterviews(prev => [entry, ...prev]);
+    return entry;
+  };
+  const removeInterview = (id) => setInterviews(prev => prev.filter(i => i.id !== id));
+  const toggleHelpful = (id, uid) => setInterviews(prev => prev.map(i => i.id === id
+    ? { ...i, helpful: (i.helpful || []).includes(uid) ? i.helpful.filter(x => x !== uid) : [...(i.helpful || []), uid] }
+    : i));
 
   // Achievement CRUD
   const addAchievement = (ach) => {
@@ -230,7 +309,7 @@ export const DataProvider = ({ children }) => {
     const profile = pendingProfiles.find(p => p.id === id);
     if (profile) {
       setPendingProfiles(prev => prev.map(p => p.id === id ? { ...p, status: 'approved' } : p));
-      setAlumniList(prev => [...prev, { ...profile, status: 'approved' }]);
+      setAlumniList(prev => [...prev, { ...profile, status: 'approved', approvedAt: new Date().toISOString() }]);
     }
   };
   const rejectProfile = (id) => {
@@ -363,6 +442,10 @@ export const DataProvider = ({ children }) => {
       alumniList, setAlumniList,
       broadcasts, addBroadcast,
       events, registerForEvent, unregisterFromEvent,
+      reloadCollection,
+      jobs, addJob, removeJob, requestReferral, withdrawReferral, setReferralStatus,
+      volunteering, addVolunteerRequest, removeVolunteerRequest, signUpToVolunteer, withdrawVolunteer, setVolunteerStatus,
+      interviews, addInterview, removeInterview, toggleHelpful,
       notifications, addNotification, setNotifications,
       getTodayBirthdays,
       automationSettings, setAutomationSettings,

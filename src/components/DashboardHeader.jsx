@@ -1,10 +1,9 @@
 import React from 'react';
-import { Search, Bell, Settings, Command } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Search, Settings, Command } from 'lucide-react';
+import NotificationBell from './NotificationBell';
+import { openSearch } from './SearchPalette';
 
 const DashboardHeader = ({ title, subtitle }) => {
-  const { user } = useAuth();
-
   return (
     <div className="dashboard-header" style={{ 
       display: 'flex', 
@@ -26,12 +25,17 @@ const DashboardHeader = ({ title, subtitle }) => {
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
           <input 
             type="text" 
-            placeholder="Search resources, mentors..." 
+            readOnly
+            onFocus={(e) => { e.target.blur(); openSearch(); }}
+            onClick={() => openSearch()}
+            aria-label="Search people, jobs and events"
+            placeholder="Search people, jobs, events..." 
             style={{ 
               padding: '0.7rem 3rem 0.7rem 2.75rem', 
               background: 'var(--white)', 
               borderRadius: '12px',
-              fontSize: '0.85rem'
+              fontSize: '0.85rem',
+              cursor: 'pointer'
             }} 
           />
           <div style={{ 
@@ -54,10 +58,7 @@ const DashboardHeader = ({ title, subtitle }) => {
           </div>
         </div>
 
-        <button className="btn-icon btn-ghost" style={{ flexShrink: 0 }} aria-label="Notifications">
-          <Bell size={20} />
-          <span style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #fff' }}></span>
-        </button>
+        <NotificationBell />
         
         <button className="btn-icon btn-ghost" style={{ flexShrink: 0 }} aria-label="Settings">
           <Settings size={20} />

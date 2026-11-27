@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { api, TOKEN_KEY } from '../lib/api';
+import { api, TOKEN_KEY, USER_KEY, session } from '../lib/api';
 
 const AuthContext = createContext();
 
@@ -9,9 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const savedUser = localStorage.getItem('alumni_portal_user');
-    const savedToken = localStorage.getItem(TOKEN_KEY);
+    // Restore this tab's sign-in (sessionStorage: survives refresh, not a new tab)
+    const savedUser = session.getItem(USER_KEY);
+    const savedToken = session.getItem(TOKEN_KEY);
     let parsed;
     try { parsed = savedUser ? JSON.parse(savedUser) : null; } catch { parsed = null; }
     // A session needs both the user and the server-issued token (RBAC)
@@ -19,41 +19,41 @@ export const AuthProvider = ({ children }) => {
       // Update last login
       parsed.lastLogin = new Date().toISOString();
       setUser(parsed);
-      localStorage.setItem('alumni_portal_user', JSON.stringify(parsed));
+      session.setItem(USER_KEY, JSON.stringify(parsed));
 
       // The role comes from the database, not from what this browser saved.
       // A 401 here ends the session (see onExpired); if the API can't be
       // reached, keep the saved session so the offline cache still works.
       api.get('/api/auth/me')
         .then(({ user: fresh, token }) => {
-          if (token) localStorage.setItem(TOKEN_KEY, token);
+          if (token) session.setItem(TOKEN_KEY, token);
           setUser((prev) => {
             if (!prev) return prev;
             const next = { ...prev, id: fresh.id, email: fresh.email, role: fresh.role, profileStatus: fresh.profileStatus };
-            localStorage.setItem('alumni_portal_user', JSON.stringify(next));
+            session.setItem(USER_KEY, JSON.stringify(next));
             return next;
           });
         })
         .catch(() => { /* handled by auth:expired, or offline */ });
     } else if (savedUser || savedToken) {
       // Corrupt, old-format or token-less session: drop it and sign in again
-      localStorage.removeItem('alumni_portal_user');
-      localStorage.removeItem(TOKEN_KEY);
+      session.removeItem(USER_KEY);
+      session.removeItem(TOKEN_KEY);
     }
     setLoading(false);
 
     // The API reports an expired/invalid token → end the session
     const onExpired = () => {
       setUser(null);
-      localStorage.removeItem('alumni_portal_user');
-      localStorage.removeItem(TOKEN_KEY);
+      session.removeItem(USER_KEY);
+      session.removeItem(TOKEN_KEY);
     };
     window.addEventListener('auth:expired', onExpired);
     return () => window.removeEventListener('auth:expired', onExpired);
   }, []);
 
   const login = (userData, token) => {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
+    if (token) session.setItem(TOKEN_KEY, token);
     const enrichedUser = {
       ...userData,
       lastLogin: new Date().toISOString(),
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       dob: userData.dob || null,
     };
     setUser(enrichedUser);
-    localStorage.setItem('alumni_portal_user', JSON.stringify(enrichedUser));
+    session.setItem(USER_KEY, JSON.stringify(enrichedUser));
   };
 
   const updateProfile = (profileData) => {
@@ -106,13 +106,13 @@ export const AuthProvider = ({ children }) => {
       profileUpdatesHistory: newHistory
     };
     setUser(updated);
-    localStorage.setItem('alumni_portal_user', JSON.stringify(updated));
+    session.setItem(USER_KEY, JSON.stringify(updated));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('alumni_portal_user');
-    localStorage.removeItem(TOKEN_KEY);
+    session.removeItem(USER_KEY);
+    session.removeItem(TOKEN_KEY);
   };
 
   return (

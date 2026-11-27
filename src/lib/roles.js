@@ -28,6 +28,13 @@ export const PAGE_ACCESS = {
   // Students register for events from their dashboard ("Register Now");
   // the server only lets members change their own registration
   '/events': [ROLES.ALUMNI, ROLES.STUDENT, ...ADMIN_ROLES],
+  // Jobs & referrals posted by alumni; students request referrals
+  '/jobs': ALL_ROLES,
+  '/campus': ALL_ROLES,
+  // Yearbooks are for graduates (and the staff who look after them)
+  '/yearbook': [ROLES.ALUMNI, ROLES.PROFESSOR, ...ADMIN_ROLES],
+  '/messages': ALL_ROLES,
+  '/career': ALL_ROLES,
   '/admin': ADMIN_ROLES,
   '/alumni/dashboard': [ROLES.ALUMNI],
   '/student/dashboard': [ROLES.STUDENT],

@@ -48,6 +48,9 @@ export const LIST_COLLECTIONS = {
   events: mongoose.model('Event', listSchema(), 'events'),
   notifications: mongoose.model('Notification', listSchema(), 'notifications'),
   birthdayLogs: mongoose.model('BirthdayLog', listSchema(), 'birthday_logs'),
+  jobs: mongoose.model('Job', listSchema(), 'jobs'),
+  volunteering: mongoose.model('VolunteerRequest', listSchema(), 'volunteering'),
+  interviews: mongoose.model('InterviewExperience', listSchema(), 'interviews'),
 };
 
 /* ── Settings: single-document values (automation config, wish ledger) ── */
@@ -61,3 +64,69 @@ const settingSchema = new Schema(
 export const Setting = mongoose.model('Setting', settingSchema, 'settings');
 
 export const SETTING_KEYS = ['automationSettings', 'wishedAlumni'];
+
+/* ── Private, per-person records (served by /api/social, never by /api/data) ── */
+const opts = { timestamps: true, versionKey: false };
+
+// Direct messages between two members (ids are portal uids)
+export const Message = mongoose.model('Message', new Schema({
+  from: { type: String, required: true, index: true },
+  fromName: String,
+  to: { type: String, required: true, index: true },
+  toName: String,
+  text: { type: String, required: true, maxlength: 4000 },
+  read: { type: Boolean, default: false },
+}, opts));
+
+// Mentorship sessions booked with an alumnus
+export const MentorSession = mongoose.model('MentorSession', new Schema({
+  mentorId: { type: String, required: true, index: true },
+  mentorName: String,
+  menteeId: { type: String, required: true, index: true },
+  menteeName: String,
+  menteeRole: String,
+  area: String,
+  topic: String,
+  note: String,
+  slot: { type: Date, required: true },
+  mode: { type: String, default: 'Video call' },
+  status: { type: String, enum: ['requested', 'confirmed', 'declined', 'cancelled', 'completed'], default: 'requested' },
+}, opts));
+
+// Resume review requests (CV stored inline, small files only)
+export const ResumeReview = mongoose.model('ResumeReview', new Schema({
+  studentId: { type: String, required: true, index: true },
+  studentName: String,
+  field: String,
+  note: String,
+  fileName: String,
+  fileType: String,
+  fileData: String,
+  status: { type: String, enum: ['open', 'in_review', 'reviewed'], default: 'open' },
+  reviewerId: { type: String, index: true },
+  reviewerName: String,
+  feedback: String,
+  rating: Number,
+}, opts));
+
+// In-app notifications for one person
+export const Alert = mongoose.model('Alert', new Schema({
+  userId: { type: String, required: true, index: true },
+  type: String,
+  title: String,
+  body: String,
+  link: String,
+  read: { type: Boolean, default: false },
+}, opts));
+
+// Content reported by members for admin moderation
+export const Report = mongoose.model('Report', new Schema({
+  reporterId: String,
+  reporterName: String,
+  kind: { type: String, enum: ['post', 'job', 'interview'], required: true },
+  itemId: { type: String, required: true },
+  itemTitle: String,
+  reason: String,
+  status: { type: String, enum: ['open', 'dismissed', 'removed'], default: 'open' },
+  resolvedBy: String,
+}, opts));

@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import EventCover from '../../components/EventCover';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Link } from 'react-router-dom';
 import DashboardHeader from '../../components/DashboardHeader';
-import { Heart, Users, Briefcase, MessageSquare, Award, Globe, Cake, Trophy, Clock, Send, CheckCircle, AlertCircle, CreditCard, Calendar, ExternalLink } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import useRazorpay from '../../hooks/useRazorpay';
+import LandingHero from '../../components/LandingHero';
+import { FamousAlumni, RecruitersAndFirms } from '../../components/Showcase';
+import ProfileMeter from '../../components/ProfileMeter';
+import { ReportButton } from '../../components/Badges';
+import { Heart, Users, Briefcase, MessageSquare, Award, Globe, Cake, Trophy, Clock, Send, CheckCircle, AlertCircle, Calendar, ExternalLink } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AlumniDashboard = () => {
   const { user, updateProfile } = useAuth();
   const { 
     achievements, posts, addPost, getTodayBirthdays, 
-    events, registerForEvent, unregisterFromEvent, broadcasts,
+    events, broadcasts, jobs, volunteering, alumniList,
     wishedAlumni, automationSettings 
   } = useData();
-  const openRazorpay = useRazorpay();
-  const [paymentToast, setPaymentToast] = useState('');
   const [postText, setPostText] = useState('');
   const [postSubmitted, setPostSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -97,32 +97,6 @@ const AlumniDashboard = () => {
     setTimeout(() => setPostSubmitted(false), 4000);
   };
 
-  const handleRazorpay = (event) => {
-    const alreadyRegistered = event.registrations?.some(r => r.userId === user?.id);
-    if (alreadyRegistered) return;
-    if (event.fee === 0) {
-      registerForEvent(event.id, user?.id, user?.name);
-      setPaymentToast(`Registered for ${event.title}!`);
-      setTimeout(() => setPaymentToast(''), 3000);
-      return;
-    }
-    openRazorpay({
-      amount: event.fee,
-      eventTitle: event.title,
-      description: `Registration for ${event.title}`,
-      user,
-      onSuccess: () => {
-        registerForEvent(event.id, user?.id, user?.name);
-        setPaymentToast(`Payment successful! Registered for ${event.title} 🎉`);
-        setTimeout(() => setPaymentToast(''), 4000);
-      },
-      onFailure: (msg) => {
-        setPaymentToast(`Payment failed: ${msg}`);
-        setTimeout(() => setPaymentToast(''), 4000);
-      },
-    });
-  };
-
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
   const formatTime = (d) => d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Never';
 
@@ -130,7 +104,6 @@ const AlumniDashboard = () => {
     { id: 'overview', label: 'Overview', icon: <Globe size={16} /> },
     { id: 'achievements', label: 'Achievements', icon: <Trophy size={16} /> },
     { id: 'feed', label: 'Community Feed', icon: <MessageSquare size={16} /> },
-    { id: 'events', label: 'Events', icon: <Calendar size={16} /> },
     { id: 'birthdays', label: 'Birthdays', icon: <Cake size={16} /> },
     { id: 'profile', label: 'My Profile', icon: <Users size={16} /> },
   ];
@@ -149,19 +122,14 @@ const AlumniDashboard = () => {
 
   return (
     <div className="dashboard-container" style={{ padding: '2.5rem' }}>
-      <DashboardHeader title={`Welcome, ${user?.name?.split(' ')[0] || 'Alumnus'}! 🏛️`} subtitle="Your alumni dashboard — stay connected and engaged." />
-
-      {/* Payment Toast */}
-      <AnimatePresence>
-        {paymentToast && (
-          <motion.div
-            initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -80, opacity: 0 }}
-            style={{ position: 'fixed', top: '1.5rem', left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid var(--blue-100)', padding: '0.875rem 2rem', borderRadius: '99px', zIndex: 9999, fontWeight: '700', fontSize: '0.875rem', color: paymentToast.startsWith('Payment failed') ? '#dc2626' : '#059669', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', whiteSpace: 'nowrap' }}
-          >
-            {paymentToast.startsWith('Payment failed') ? '❌' : <CheckCircle size={16} />} {paymentToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LandingHero
+        title={`Welcome, ${user?.name?.split(' ')[0] || 'Alumnus'}! 🏛️`}
+        subtitle="Back on campus, wherever you are. Post jobs, refer juniors and stay in touch with your batch."
+      />
+      <DashboardHeader
+        title="Your Alumni Dashboard"
+        subtitle={`Last signed in ${formatTime(user?.lastLogin)} · Profile last updated ${user?.lastProfileUpdate ? formatTime(user.lastProfileUpdate) : 'never'}`}
+      />
 
       {/* Profile Status Banner */}
       {user?.profileStatus === 'pending' && (
@@ -171,24 +139,10 @@ const AlumniDashboard = () => {
         </motion.div>
       )}
 
-      {/* Login/Profile Info Bar */}
-      <div style={{ display: 'flex', gap: '0.75rem 1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
-          <Clock size={16} style={{ color: 'var(--blue-600)' }} />
-          <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Last Login:</span>
-          <span style={{ fontWeight: '700' }}>{formatTime(user?.lastLogin)}</span>
-        </div>
-        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem' }}>
-          <CheckCircle size={16} style={{ color: '#059669' }} />
-          <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Last Profile Update:</span>
-          <span style={{ fontWeight: '700' }}>{formatTime(user?.lastProfileUpdate)}</span>
-        </div>
-      </div>
-
       {/* Tab Navigation */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
+      <div className="seg" role="tablist" aria-label="Dashboard sections" style={{ marginBottom: '1.75rem' }}>
         {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem', borderRadius: '99px', border: '1px solid', borderColor: activeTab === tab.id ? 'var(--blue-700)' : 'var(--border)', background: activeTab === tab.id ? 'var(--blue-700)' : '#fff', color: activeTab === tab.id ? '#fff' : 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+          <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
             {tab.icon} {tab.label}
           </button>
         ))}
@@ -198,11 +152,11 @@ const AlumniDashboard = () => {
       {activeTab === 'overview' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           {/* Quick Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
             {[
               { label: 'Achievements', value: achievements.length, icon: <Trophy size={20} />, color: '#f59e0b', bg: '#fffbeb' },
               { label: 'Community Posts', value: approvedPosts.length, icon: <MessageSquare size={20} />, color: '#3b82f6', bg: '#eff6ff' },
-              { label: 'Upcoming Events', value: events.length, icon: <Calendar size={20} />, color: '#8b5cf6', bg: '#f5f3ff' },
+              { label: 'Upcoming Events', value: events.filter(e => e.date && e.date >= new Date().toISOString().slice(0, 10)).length, icon: <Calendar size={20} />, color: '#8b5cf6', bg: '#f5f3ff' },
               { label: "Today's Birthdays", value: todayBirthdays.length, icon: <Cake size={20} />, color: '#ec4899', bg: '#fdf2f8' },
             ].map((s, i) => (
               <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
@@ -211,12 +165,31 @@ const AlumniDashboard = () => {
               </div>
             ))}
           </div>
+          <div className="dash-split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)', gap: '1.5rem', alignItems: 'start', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+          {/* Jobs & referrals — the main reason students visit alumni */}
+          {(() => {
+            const myJobs = jobs.filter(j => j.postedById === user?.id);
+            const pendingReqs = myJobs.reduce((n, j) => n + (j.requests || []).filter(r => r.status === 'pending').length, 0);
+            return (
+              <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap', background: 'var(--blue-50)', borderColor: 'var(--blue-100)' }}>
+                <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'var(--blue-700)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Briefcase size={22} /></div>
+                <div style={{ flex: '1 1 240px', minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>Jobs & Referrals</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    {myJobs.length ? `You have ${myJobs.length} posting${myJobs.length > 1 ? 's' : ''} · ${pendingReqs} referral request${pendingReqs === 1 ? '' : 's'} waiting.` : 'Students are looking for referrals. Share an opening at your company.'}
+                  </div>
+                </div>
+                <Link to="/jobs" className="btn btn-primary btn-sm">{myJobs.length ? 'Manage Postings' : 'Post a Job'}</Link>
+              </div>
+            );
+          })()}
           {/* Recent Broadcasts */}
           {broadcasts.length > 0 && (
-            <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid var(--blue-700)' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertCircle size={18} style={{ color: 'var(--blue-700)' }} /> Latest Announcements</h3>
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertCircle size={18} style={{ color: 'var(--blue-700)' }} /> Latest announcements</h3>
               {broadcasts.slice(0, 3).map(bc => (
-                <div key={bc.id} style={{ padding: '1rem', background: 'var(--gray-50)', borderRadius: '12px', marginBottom: '0.75rem' }}>
+                <div key={bc.id} style={{ padding: '0.9rem 1rem', background: 'var(--gray-50)', borderRadius: '12px', marginTop: '0.6rem' }}>
                   <div style={{ fontWeight: '700', marginBottom: '0.25rem' }}>{bc.title}</div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{bc.message}</p>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{formatDate(bc.createdAt)}</span>
@@ -224,6 +197,27 @@ const AlumniDashboard = () => {
               ))}
             </div>
           )}
+            </div>
+          {/* Profile completeness */}
+          {(() => {
+            const record = { ...(alumniList.find(a => a.id === user?.id) || {}), ...user };
+            const toProfile = () => setActiveTab('profile');
+            const items = [
+              { label: 'Add your current company', done: Boolean(record.company), onClick: toProfile },
+              { label: 'Add your job title', done: Boolean(record.profession), onClick: toProfile },
+              { label: 'Add your phone number', done: Boolean(record.phone), onClick: toProfile },
+              { label: 'Link your LinkedIn profile', done: Boolean(record.linkedin), onClick: toProfile },
+              { label: 'Write a short bio', done: Boolean(record.bio), onClick: toProfile },
+              { label: 'Post a job or referral', done: jobs.some(j => j.postedById === user?.id), to: '/jobs' },
+              { label: 'Volunteer for a campus activity', done: volunteering.some(v => (v.signups || []).some(x => x.userId === user?.id)), to: '/career?tab=volunteer' },
+            ];
+            return (
+              <ProfileMeter title="Your profile" hint="Complete profiles show up first in Directory and Mentorship searches." items={items} />
+            );
+          })()}
+          </div>
+          <FamousAlumni />
+          <RecruitersAndFirms showRecruiters={false} />
         </motion.div>
       )}
 
@@ -455,6 +449,11 @@ const AlumniDashboard = () => {
                   </div>
                   {post.title && <h4 style={{ fontWeight: '800', fontSize: '1.05rem', color: 'var(--blue-900)', marginBottom: '0.5rem' }}>🏆 {post.title}</h4>}
                   <p style={{ color: 'var(--text-main)', fontSize: '0.925rem', lineHeight: '1.7' }}>{post.content}</p>
+                  {post.authorId !== user?.id && post.authorName !== user?.name && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                      <ReportButton kind="post" itemId={post.id} itemTitle={post.title || `Post by ${post.authorName}`} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -463,56 +462,6 @@ const AlumniDashboard = () => {
       )}
 
       {/* EVENTS TAB */}
-      {activeTab === 'events' && (() => {
-        const handleDashboardUnregister = (evt) => {
-          unregisterFromEvent(evt.id, user?.id);
-          setPaymentToast(`Unregistered from ${evt.title}`);
-          setTimeout(() => setPaymentToast(''), 3000);
-        };
-        return (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '1.5rem' }}>📅 Upcoming Events</h3>
-            <div style={{ display: 'grid', gap: '1.25rem' }}>
-              {events.map(evt => {
-                const registered = evt.registrations?.some(r => r.userId === user?.id);
-                return (
-                  <div key={evt.id} className="card dash-evt" style={{ display: 'grid', gridTemplateColumns: '200px minmax(0, 1fr)', gap: 0, overflow: 'hidden', padding: 0 }}>
-                    <EventCover event={evt} compact style={{ minHeight: '180px' }} />
-                    <div style={{ padding: '1.5rem', minWidth: 0 }}>
-                      <span className="tag" style={{ marginBottom: '0.75rem', display: 'inline-block' }}>{evt.category}</span>
-                      <h4 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '0.5rem' }}>{evt.title}</h4>
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.6' }}>{evt.description}</p>
-                      <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-                        <span>📅 {formatDate(evt.date)}</span>
-                        <span>🕒 {evt.time}</span>
-                        <span>📍 {evt.location}</span>
-                      </div>
-                      {registered ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#059669', fontWeight: '700', fontSize: '0.9rem' }}>
-                            <CheckCircle size={18} /> Registered Successfully
-                          </div>
-                          <button
-                            style={{ padding: '0.5rem 1.1rem', borderRadius: '10px', border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer' }}
-                            onClick={() => handleDashboardUnregister(evt)}
-                          >
-                            Unregister
-                          </button>
-                        </div>
-                      ) : (
-                        <button className="btn btn-primary" onClick={() => handleRazorpay(evt)}>
-                          <CreditCard size={16} /> {evt.fee > 0 ? `Register & Pay ₹${evt.fee}` : 'Register Free'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-        );
-      })()}
-
       {/* BIRTHDAYS TAB */}
       {activeTab === 'birthdays' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
